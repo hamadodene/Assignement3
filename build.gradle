@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+def versions = [
+        JavaBinary: "2.13"
+]
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation platform("com.typesafe.akka:akka-bom_${versions.JavaBinary}:2.6.16")
+    implementation "com.typesafe.akka:akka-actor_${versions.JavaBinary}"
+}
+
+test {
+    useJUnitPlatform()
+}
