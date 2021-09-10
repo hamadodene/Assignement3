@@ -14,17 +14,11 @@ public class client {
         try {
             Client client = new Client("192.168.1.55",8080);
             //System.out.println("aajkajkajk");
-            client.sendMessage("1");
+            client.sendMessage("ROLE_1");
             client.messagesQueueHandling();
-
-            Server server = new Server(address,0,8081,"hama2");
-            server.startNode();
-            server.messagesQueueHandling();
-            client.connectToNewNode("192.168.1.55", 8081);
+            //client.sendMessage("Saluto Serverrsss");
 
             client.join();
-            server.join();
-
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

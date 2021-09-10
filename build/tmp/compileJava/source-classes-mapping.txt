@@ -1,11 +1,17 @@
 connection/Client.java
  connection.Client
  connection.Client$ConnectionToServer
+node/client.java
+ node.client
+node/server2.java
+ node.server2
+Main.java
+ Main
+node/server1.java
+ node.server1
 connection/Server.java
  connection.Server
  connection.Server$ConnectionToClient
  connection.Server$ConnectionToOtherServer
-Main.java
- Main
-node/client.java
- node.client
+connection/NodeInfo.java
+ connection.NodeInfo

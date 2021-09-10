@@ -13,8 +13,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation 'junit:junit:4.13'
     implementation platform("com.typesafe.akka:akka-bom_${versions.JavaBinary}:2.6.16")
     implementation "com.typesafe.akka:akka-actor_${versions.JavaBinary}"
 }
