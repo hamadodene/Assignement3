@@ -66,7 +66,7 @@ public class Server {
                         }
                         System.out.println("Accept connection from client " + socket.getInetAddress().getHostAddress() + " port" + socket.getPort());
                         client = new ConnectionToClient(socket);
-                        clientCount = 1;
+                        clientCount++;
                     }
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
@@ -93,13 +93,6 @@ public class Server {
         messageHandling.start();
     }
 
-    public int getRole(Socket socket) throws IOException {
-        InputStream input = socket.getInputStream();
-        DataInputStream data = new DataInputStream(input);
-        int role = Integer.parseInt(data.readUTF());
-        System.out.println("Role in getRole is " + role);
-        return role;
-    }
 
     public void broadcast(String message) throws IOException {
         //Send broadCast
@@ -126,9 +119,20 @@ public class Server {
                 //Get message from local client
                 try {
                     String message = dataInputStream.readUTF();
-                    messages.put(message);
-                    //Send also broadCast to other server
-                    broadcast(message);
+                    //Connect to other server
+                    if(message.contains("REGISTER")) {
+                        System.out.println("Connecting new node");
+                        String nodeInfo = message.replace("REGISTER_", "");
+                        String address = nodeInfo.split("_")[0];
+                        String port = nodeInfo.split("_")[1];
+                        Socket ss = new Socket(address, Integer.parseInt(port));
+                        serverList.add(new ConnectionToOtherServer(socket));
+                        System.out.println("List of server " + serverList.toString());
+                    } else {
+                        messages.put(message);
+                        //Send also broadCast to other server
+                        broadcast(message);
+                    }
 
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
@@ -167,8 +171,8 @@ public class Server {
             dataInputStream = new DataInputStream(inputStream);
 
              read = new Thread(() -> {
-                //Get message from local client
                 try {
+                    //Read message From other server
                     String message = dataInputStream.readUTF();
                     messages.put(message);
 

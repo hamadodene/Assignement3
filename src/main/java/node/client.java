@@ -16,7 +16,16 @@ public class client {
             //System.out.println("aajkajkajk");
             client.sendMessage("1");
             client.messagesQueueHandling();
+
+            Server server = new Server(address,0,8081,"hama2");
+            server.startNode();
+            server.messagesQueueHandling();
+            client.connectToNewNode("192.168.1.55", 8081);
+
             client.join();
+            server.join();
+
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

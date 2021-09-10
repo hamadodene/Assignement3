@@ -43,6 +43,11 @@ public class Client {
         messageHandling.start();
     }
 
+    public void connectToNewNode(String address, int port) throws IOException {
+        //Get server ip and port and name
+        sendMessage("REGISTER_"+address+"_"+port);
+    }
+
     private class ConnectionToServer {
         Socket socket;
         public ConnectionToServer(Socket socket) throws IOException, InterruptedException {

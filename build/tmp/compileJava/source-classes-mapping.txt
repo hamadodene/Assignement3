@@ -1,5 +1,3 @@
-node/client.java
- node.client
 connection/Client.java
  connection.Client
  connection.Client$ConnectionToServer
@@ -9,3 +7,5 @@ connection/Server.java
  connection.Server$ConnectionToOtherServer
 Main.java
  Main
+node/client.java
+ node.client
