@@ -8,9 +8,6 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class Server extends Thread {
     private int port;
@@ -18,15 +15,14 @@ public class Server extends Thread {
     private ServerSocket serverSocket;
     private Socket socket;
     private int backlog;
-    private ArrayList<ServerRemoteRequestHandler> srh;
-    private ArrayList<NodeInfo> activeServer;
-    private ClientRemoteRequestHandler crh;
-    private LinkedBlockingQueue<Object> messages;
+    private Shared shared;
+    ClientRemoteRequestHandler crh;
 
     public Server(InetAddress address, int backlog, int port) {
         this.address = address;
         this.backlog = backlog;
         this.port = port;
+        shared = new Shared();
     }
 
     @Override
@@ -54,29 +50,19 @@ public class Server extends Thread {
             boolean isServer = ((ConnectionRequest) request).getNodeInfo().isServer();
             String name = ((ConnectionRequest) request).getNodeInfo().getName();
             if (isServer) {
-                ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name);
-                srh.add(rh);
+                ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name, shared);
+                shared.addServer(rh);
+                shared.addServerInfo(((ConnectionRequest) request).getNodeInfo());
 
             } else {
-                crh = new ClientRemoteRequestHandler(socket, name);
+                crh = new ClientRemoteRequestHandler(socket, name, shared);
             }
         } else {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ErrorMessage error = new ErrorMessage("Need Connection request before start");
+            ErrorMessage error = new ErrorMessage("Need Connection request before start", -1);
             out.writeUnshared(error);
             socket.close();
             out.close();
-        }
-    }
-
-    public synchronized void broadCast(Message message) {
-        System.out.println("Server: send " + message);
-        Iterator<ServerRemoteRequestHandler> it = srh.iterator();
-        while (it.hasNext()) {
-            ServerRemoteRequestHandler srh = it.next();
-            // writeUnshared() is like writeObject(), but always writes
-            // a new copy of the object
-            srh.sendMessage(message);
         }
     }
 }

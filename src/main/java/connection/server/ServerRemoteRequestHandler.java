@@ -13,10 +13,13 @@ public class ServerRemoteRequestHandler {
     private ObjectOutputStream out;
     private String name;
     private Thread readFromNode;
-    public ServerRemoteRequestHandler(Socket socket, String name) throws IOException {
+    private Shared shared;
+
+    public ServerRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException {
         this.socket = socket;
         out = new ObjectOutputStream(socket.getOutputStream());
         this.name = name;
+        this.shared = shared;
         start();
     }
 
@@ -40,7 +43,11 @@ public class ServerRemoteRequestHandler {
 
     private void processNodeRequest(Object request) {
         if (request instanceof Message) {
-
+            try {
+                shared.add(((Message) request).getMessage());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

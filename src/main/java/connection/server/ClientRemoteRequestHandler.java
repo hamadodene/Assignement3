@@ -12,11 +12,13 @@ public class ClientRemoteRequestHandler {
     private ObjectOutputStream out;
     private String name;
     private Thread readFromClient;
+    private Shared shared;
 
-    public ClientRemoteRequestHandler(Socket socket, String name) throws IOException {
+    public ClientRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException {
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.name = name;
+        this.shared = shared;
         start();
     }
 
@@ -39,7 +41,7 @@ public class ClientRemoteRequestHandler {
 
     private void processNodeRequest(Object request) {
         if (request instanceof Message) {
-
+            shared.broadCast((Message) request);
         }
     }
 
