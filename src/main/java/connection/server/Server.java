@@ -29,6 +29,7 @@ public class Server extends Thread {
     public void run() {
         try {
             serverSocket = new ServerSocket(port, backlog, address);
+            System.out.println("Start server: " + serverSocket.getInetAddress().getHostAddress() + " " + serverSocket.getLocalPort());
             ObjectInputStream in;
             ObjectOutputStream out;
 
