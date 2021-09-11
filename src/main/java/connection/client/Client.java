@@ -10,50 +10,51 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class Client extends Thread {
+public class Client {
     private String name;
     private int port;
     private String address;
     //Need this to write to server
-    ObjectOutputStream out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private ServerConnectionHandler serverConnectionHandler;
+    private MessagesQueue queue;
+    private Thread messageHandling;
 
     public Client(String address, int port, String name) {
         this.address = address;
         this.port = port;
         this.name = name;
+        this.queue = new MessagesQueue();
+        //Start messages queue processing thread
+        messagesQueueHandling();
     }
 
-    @Override
-    public void run() {
+    public void start() {
         try {
             Socket toServer = new Socket(address, port);
-            ObjectInputStream in = new ObjectInputStream(toServer.getInputStream());
-            out = new ObjectOutputStream(toServer.getOutputStream());
-            System.out.println("Client: connected!");
+            System.out.println("Client: connected! ");
             String address = toServer.getInetAddress().getHostAddress();
             int port = toServer.getLocalPort();
             //Send a connection request for start game
-            sendConnectionRequest(address,port,name,false);
+            in = new ObjectInputStream(toServer.getInputStream());
+            out = new ObjectOutputStream(toServer.getOutputStream());
+            sendConnectionRequest(address, port, name, false, out, in);
 
-            while (true) {
-                if(in.readObject() instanceof ErrorMessage) {
-                    System.out.println("Client: encored error during connection " + ((ErrorMessage) in.readObject()).getError());
-                } else if(in.readObject() instanceof  Message) {
-                    Message message = (Message) in.readObject();
-                    System.out.println("Client: received message " + message );
-                }
-            }
+            serverConnectionHandler = new ServerConnectionHandler(toServer, queue);
+            serverConnectionHandler.start();
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    public void sendConnectionRequest(String address, int port, String name,boolean isServer) {
+    public void sendConnectionRequest(String address, int port, String name, boolean isServer, ObjectOutputStream out, ObjectInputStream in) {
         NodeInfo nodeInfo;
-        if(isServer) {
-            nodeInfo = new NodeInfo(address,port,name,true);
+        if (isServer) {
+            nodeInfo = new NodeInfo(address, port, name, true);
         } else {
-            nodeInfo = new NodeInfo(address,port,name,false);
+            nodeInfo = new NodeInfo(address, port, name, false);
         }
         ConnectionRequest conn = new ConnectionRequest(nodeInfo);
         try {
@@ -62,5 +63,29 @@ public class Client extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendRequestToServer(String message) {
+        serverConnectionHandler.sendMessage(message);
+    }
+
+    public void join() throws InterruptedException {
+        serverConnectionHandler.join();
+        messageHandling.join();
+    }
+
+    public void messagesQueueHandling() {
+        messageHandling = new Thread(() -> {
+            while (true) {
+                try {
+                    Message message = queue.take();
+                    //Update GUI
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        messageHandling.setDaemon(true);
+        messageHandling.start();
     }
 }

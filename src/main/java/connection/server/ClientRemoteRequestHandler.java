@@ -13,34 +13,34 @@ public class ClientRemoteRequestHandler {
     private String name;
     private Thread readFromClient;
     private Shared shared;
+    private ObjectInputStream in;
 
-    public ClientRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException {
+    public ClientRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException, InterruptedException {
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.name = name;
         this.shared = shared;
+        this.in = new ObjectInputStream(socket.getInputStream());
         start();
     }
 
     public void start() {
-         readFromClient = new Thread(() -> {
+        readFromClient = new Thread(() -> {
             while (true) {
                 try {
-                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                     processNodeRequest(in.readObject());
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-
             }
         });
-        readFromClient.setName(name);
         readFromClient.setDaemon(true);
         readFromClient.start();
     }
 
     private void processNodeRequest(Object request) {
         if (request instanceof Message) {
+            System.out.println("Server: receive message from client:  " + ((Message) request).getMessage());
             shared.broadCast((Message) request);
         }
     }
@@ -52,6 +52,7 @@ public class ClientRemoteRequestHandler {
             e.printStackTrace();
         }
     }
+
     public void join() throws InterruptedException {
         readFromClient.join();
     }

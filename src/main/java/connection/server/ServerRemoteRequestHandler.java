@@ -44,7 +44,8 @@ public class ServerRemoteRequestHandler {
     private void processNodeRequest(Object request) {
         if (request instanceof Message) {
             try {
-                shared.add(((Message) request).getMessage());
+                System.out.println("Server: received message:  " + ((Message) request).getMessage());
+                shared.add((Message) request);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -57,6 +58,13 @@ public class ServerRemoteRequestHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getAddress() {
+        return socket.getInetAddress().getHostAddress();
+    }
+    public int getPort() {
+        return socket.getLocalPort();
     }
 
     public void join() throws InterruptedException {
