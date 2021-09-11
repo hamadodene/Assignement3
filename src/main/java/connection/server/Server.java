@@ -21,6 +21,7 @@ public class Server {
     private ObjectOutputStream out;
     private Thread accept;
     private Thread messageHandling;
+    int count = 0;
 
     public Server(InetAddress address, int backlog, int port) {
         this.address = address;
@@ -37,6 +38,7 @@ public class Server {
             while (true) {
                 try {
                     socket = serverSocket.accept();
+                    System.out.println("Counter "  + count++);
                     out = new ObjectOutputStream(socket.getOutputStream());
                     System.out.println("Accepted connection from " + socket.getInetAddress().getHostAddress() + " " + socket.getPort());
                     processRequest(socket);
@@ -74,8 +76,8 @@ public class Server {
         } else {
             ErrorMessage error = new ErrorMessage("Need Connection request before start", -1);
             out.writeUnshared(error);
-            //socket.close();
-            //out.close();
+            socket.close();
+            out.close();
         }
     }
 

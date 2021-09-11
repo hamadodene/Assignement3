@@ -1,5 +1,6 @@
 package connection.server;
 
+import connection.client.MessagesQueue;
 import connection.message.Message;
 
 import java.io.IOException;
@@ -18,9 +19,9 @@ public class ClientRemoteRequestHandler {
     public ClientRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException, InterruptedException {
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
         this.name = name;
         this.shared = shared;
-        this.in = new ObjectInputStream(socket.getInputStream());
         start();
     }
 
@@ -28,7 +29,8 @@ public class ClientRemoteRequestHandler {
         readFromClient = new Thread(() -> {
             while (true) {
                 try {
-                    processNodeRequest(in.readObject());
+                    Object message = in.readObject();
+                    processNodeRequest(message);
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }

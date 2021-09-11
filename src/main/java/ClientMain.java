@@ -7,16 +7,10 @@ public class ClientMain  {
     public static void main(String[] args) throws UnknownHostException, InterruptedException {
         Client client = new Client(Inet4Address.getLocalHost().getHostAddress(),8080, "Hamado");
         client.start();
-        client.sendRequestToServer("Hello server");
-        client.sendRequestToServer("Hello server 2");
-
-
-        Client client2 = new Client(Inet4Address.getLocalHost().getHostAddress(),8080, "Hamado2");
-        client2.start();
-        client2.sendRequestToServer("Hello server");
-        client2.sendRequestToServer("Hello server 2");
-
+        for (int i = 0; i < 10 ; i++) {
+            client.sendRequestToServer("Hi server, this is my message number " + i);
+            Thread.sleep(4000);
+        }
         client.join();
-        client2.join();
     }
 }

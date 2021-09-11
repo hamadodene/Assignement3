@@ -14,10 +14,12 @@ public class ServerRemoteRequestHandler {
     private String name;
     private Thread readFromNode;
     private Shared shared;
+    private ObjectInputStream in;
 
     public ServerRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException {
         this.socket = socket;
         out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
         this.name = name;
         this.shared = shared;
         start();
@@ -27,7 +29,6 @@ public class ServerRemoteRequestHandler {
          readFromNode = new Thread(() -> {
             while (true) {
                 try {
-                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                     processNodeRequest(in.readObject());
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
