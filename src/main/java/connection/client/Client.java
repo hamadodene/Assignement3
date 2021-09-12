@@ -39,7 +39,7 @@ public class Client {
             //Send a connection request for start game
             in = new ObjectInputStream(toServer.getInputStream());
             out = new ObjectOutputStream(toServer.getOutputStream());
-            sendConnectionRequest(address, port, name, false, out, in);
+            sendConnectionRequest(address, port, name, false);
 
             serverConnectionHandler = new ServerConnectionHandler(toServer, queue);
             serverConnectionHandler.start();
@@ -49,7 +49,7 @@ public class Client {
         }
     }
 
-    public void sendConnectionRequest(String address, int port, String name, boolean isServer, ObjectOutputStream out, ObjectInputStream in) {
+    public void sendConnectionRequest(String address, int port, String name, boolean isServer) {
         NodeInfo nodeInfo;
         if (isServer) {
             nodeInfo = new NodeInfo(address, port, name, true);
@@ -58,6 +58,7 @@ public class Client {
         }
         ConnectionRequest conn = new ConnectionRequest(nodeInfo);
         try {
+            out.reset();
             out.writeUnshared(conn);
             out.flush();
         } catch (IOException e) {

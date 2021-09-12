@@ -1,6 +1,7 @@
 package connection.server;
 
 import connection.client.MessagesQueue;
+import connection.message.ConnectionRequest;
 import connection.message.Message;
 
 import java.io.IOException;
@@ -44,11 +45,27 @@ public class ClientRemoteRequestHandler {
         if (request instanceof Message) {
             System.out.println("Server: receive message from client:  " + ((Message) request).getMessage());
             shared.broadCast((Message) request);
+        } else if (request instanceof ConnectionRequest) {
+            String address = ((ConnectionRequest) request).getNodeInfo().getAddress();
+            int port = ((ConnectionRequest) request).getNodeInfo().getPort();
+            String name = ((ConnectionRequest) request).getNodeInfo().getName();
+
+            System.out.println("Server: received connection request request for " + address + " " + port);
+            try {
+                System.out.println("Initialize connection for " + address + ":" + port);
+                Socket socket = new Socket(address, port);
+                ServerRemoteRequestHandler srr = new ServerRemoteRequestHandler(socket, name, shared);
+                shared.addServer(srr);
+                shared.addServerInfo(((ConnectionRequest) request).getNodeInfo());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void sendMessage(Message message) {
         try {
+            out.reset();
             out.writeUnshared(message);
         } catch (IOException e) {
             e.printStackTrace();

@@ -19,7 +19,7 @@ public class Shared {
         activeServer = new ArrayList<>();
     }
 
-    public synchronized void broadCast(Message message) {
+    public void broadCast(Message message) {
         Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
         while (it.hasNext()) {
             ServerRemoteRequestHandler srh = it.next();
@@ -30,15 +30,15 @@ public class Shared {
         }
     }
 
-    public synchronized void add(Message message) throws InterruptedException {
+    public void add(Message message) throws InterruptedException {
         messages.put(message);
     }
 
-    public synchronized void addServer(ServerRemoteRequestHandler srh) {
+    public void addServer(ServerRemoteRequestHandler srh) {
         serverList.add(srh);
     }
 
-    public synchronized void addServerInfo(NodeInfo nodeInfo) {
+    public void addServerInfo(NodeInfo nodeInfo) {
         activeServer.add(nodeInfo);
     }
 

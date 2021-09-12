@@ -3,6 +3,7 @@ package connection.server;
 import connection.message.ConnectionRequest;
 import connection.message.Message;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -29,15 +30,14 @@ public class ServerRemoteRequestHandler {
          readFromNode = new Thread(() -> {
             while (true) {
                 try {
-                    processNodeRequest(in.readObject());
+                    Object message = in.readObject();
+                    processNodeRequest(message);
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
 
             }
         });
-
-        readFromNode.setName(name);
         readFromNode.setDaemon(true);
         readFromNode.start();
     }

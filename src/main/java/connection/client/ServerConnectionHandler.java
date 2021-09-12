@@ -56,6 +56,7 @@ public class ServerConnectionHandler {
         Message msg = new Message(message, false);
         try {
             System.out.println("Send message " + msg.getMessage());
+            out.reset();
             out.writeObject(msg);
             out.flush();
             System.out.println("Socket status " + socket.getInetAddress().isReachable(1));
