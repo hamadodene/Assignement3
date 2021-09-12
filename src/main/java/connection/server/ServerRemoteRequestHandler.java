@@ -28,14 +28,14 @@ public class ServerRemoteRequestHandler {
 
     private void start() {
          readFromNode = new Thread(() -> {
-            while (true) {
+            while (socket.isConnected()) {
                 try {
+                    if(in.readObject() == null )  break;
                     Object message = in.readObject();
                     processNodeRequest(message);
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-
             }
         });
         readFromNode.setDaemon(true);

@@ -21,10 +21,7 @@ public class ClientMain  {
             Thread.sleep(4000);
         }
         client.sendConnectionRequest(address.getHostAddress(), 8081,"boh", true);
-        for (int i = 0; i < 10 ; i++) {
-            client.sendRequestToServer("Hi server, this is my message number " + i);
-            Thread.sleep(4000);
-        }
+
         client.join();
         server.join();
     }

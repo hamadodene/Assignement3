@@ -28,7 +28,7 @@ public class ClientRemoteRequestHandler {
 
     public void start() {
         readFromClient = new Thread(() -> {
-            while (true) {
+            while (socket.isConnected()) {
                 try {
                     Object message = in.readObject();
                     processNodeRequest(message);
