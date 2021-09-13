@@ -31,6 +31,7 @@ public class Shared {
     }
 
     public void add(Message message) throws InterruptedException {
+        System.out.println("Server: added message on queue");
         messages.put(message);
     }
 
@@ -44,5 +45,11 @@ public class Shared {
 
     public synchronized Message takeMessage() throws InterruptedException {
         return messages.take();
+    }
+
+    public void join() throws InterruptedException {
+        for(ServerRemoteRequestHandler srr : serverList) {
+            srr.join();
+        }
     }
 }

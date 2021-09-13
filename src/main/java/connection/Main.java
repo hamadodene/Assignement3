@@ -13,7 +13,20 @@ public class Main {
         InetAddress address = Inet4Address.getLocalHost();
         Server server = new Server(address, 0, 8080);
         server.start();
+
+        Client client = new Client(Inet4Address.getLocalHost().getHostAddress(),8080, "Hamado");
+        client.start();
+
+        client.sendConnectionRequest(address.getHostAddress(), 8082,"boh", true);
+
+        for (int i = 0; i < 2 ; i++) {
+            client.sendRequestToServer("Hi server, this is my message number " + i);
+            Thread.sleep(4000);
+        }
+
         server.join();
+        client.join();
+
 
         //Client client = new Client("127.0.0.1",8080, "Hamado");
         //client.start();

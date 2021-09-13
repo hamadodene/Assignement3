@@ -28,7 +28,7 @@ public class ClientRemoteRequestHandler {
 
     public void start() {
         readFromClient = new Thread(() -> {
-            while (socket.isConnected()) {
+            while (true) {
                 try {
                     Object message = in.readObject();
                     processNodeRequest(message);
@@ -52,11 +52,14 @@ public class ClientRemoteRequestHandler {
 
             System.out.println("Server: received connection request request for " + address + " " + port);
             try {
-                System.out.println("Initialize connection for " + address + ":" + port);
                 Socket socket = new Socket(address, port);
-                ServerRemoteRequestHandler srr = new ServerRemoteRequestHandler(socket, name, shared);
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                ServerRemoteRequestHandler srr = new ServerRemoteRequestHandler(socket, name, shared, out, in);
+                srr.sendConnectionRequest(((ConnectionRequest) request).getNodeInfo());
                 shared.addServer(srr);
                 shared.addServerInfo(((ConnectionRequest) request).getNodeInfo());
+                System.out.println("Initialize connection for " + address + ":" + port);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -65,8 +68,9 @@ public class ClientRemoteRequestHandler {
 
     public void sendMessage(Message message) {
         try {
-            out.reset();
-            out.writeUnshared(message);
+            //out.reset();
+            out.writeObject(message);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

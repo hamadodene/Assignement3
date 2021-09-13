@@ -49,7 +49,7 @@ public class Client {
         }
     }
 
-    public void sendConnectionRequest(String address, int port, String name, boolean isServer) {
+    public synchronized void sendConnectionRequest(String address, int port, String name, boolean isServer) {
         NodeInfo nodeInfo;
         if (isServer) {
             nodeInfo = new NodeInfo(address, port, name, true);
@@ -59,7 +59,7 @@ public class Client {
         ConnectionRequest conn = new ConnectionRequest(nodeInfo);
         try {
             out.reset();
-            out.writeUnshared(conn);
+            out.writeObject(conn);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();

@@ -38,12 +38,12 @@ public class Server {
             while (true) {
                 try {
                     socket = serverSocket.accept();
-                    System.out.println("Counter "  + count++);
+                    System.out.println("Accept connection from "  + socket.getPort() + " " + socket.getInetAddress());
                     out = new ObjectOutputStream(socket.getOutputStream());
-                    System.out.println("Accepted connection from " + socket.getInetAddress().getHostAddress() + " " + socket.getPort());
                     processRequest(socket);
                 } catch (IOException | InterruptedException ex) {
                     System.out.println("I/O error " + ex);
+                    ex.printStackTrace();
                 }
             }
         });
@@ -51,7 +51,7 @@ public class Server {
         accept.start();
     }
 
-    private void processRequest(Socket socket) throws InterruptedException, IOException {
+    private void processRequest(Socket socket) throws IOException, InterruptedException {
         System.out.println("Server: Processing connection request");
         in = new ObjectInputStream(socket.getInputStream());
         Object request = null;
@@ -65,12 +65,12 @@ public class Server {
             boolean isServer = ((ConnectionRequest) request).getNodeInfo().isServer();
             String name = ((ConnectionRequest) request).getNodeInfo().getName();
             if (isServer) {
-                ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name, shared);
+                ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name, shared, out, in);
                 shared.addServer(rh);
                 shared.addServerInfo(((ConnectionRequest) request).getNodeInfo());
-
+                System.out.println("Accepted connection from " + socket.getInetAddress().getHostAddress() + " " + socket.getPort());
             } else {
-                System.out.println("Server: Initialize client");
+                System.out.println("Server: Initialize connection with client");
                 crh = new ClientRemoteRequestHandler(socket, name, shared);
             }
         } else {
@@ -101,6 +101,7 @@ public class Server {
         accept.join();
         messageHandling.join();
         crh.join();
+        shared.join();
     }
 
 }

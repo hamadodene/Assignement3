@@ -2,11 +2,9 @@ package connection.server;
 
 import connection.message.ConnectionRequest;
 import connection.message.Message;
+import connection.message.NodeInfo;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 
 public class ServerRemoteRequestHandler {
@@ -16,25 +14,27 @@ public class ServerRemoteRequestHandler {
     private Thread readFromNode;
     private Shared shared;
     private ObjectInputStream in;
+    private boolean sendConnectionRequest;
+    private NodeInfo info;
 
-    public ServerRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException {
+    public ServerRemoteRequestHandler(Socket socket, String name, Shared shared, ObjectOutputStream out, ObjectInputStream in) throws IOException {
         this.socket = socket;
-        out = new ObjectOutputStream(socket.getOutputStream());
-        in = new ObjectInputStream(socket.getInputStream());
+        this.out = out;
+        this.in = in;
         this.name = name;
         this.shared = shared;
         start();
     }
 
     private void start() {
-         readFromNode = new Thread(() -> {
-            while (socket.isConnected()) {
+        readFromNode = new Thread(() -> {
+            while (true) {
                 try {
-                    if(in.readObject() == null )  break;
                     Object message = in.readObject();
                     processNodeRequest(message);
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
+                    break;
                 }
             }
         });
@@ -45,7 +45,7 @@ public class ServerRemoteRequestHandler {
     private void processNodeRequest(Object request) {
         if (request instanceof Message) {
             try {
-                System.out.println("Server: received message:  " + ((Message) request).getMessage());
+                System.out.println("Server: received message from another node:  " + ((Message) request).getMessage());
                 shared.add((Message) request);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -55,7 +55,9 @@ public class ServerRemoteRequestHandler {
 
     public void sendMessage(Message message) {
         try {
-            out.writeUnshared(message);
+            //out.reset();
+            out.writeObject(message);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -64,11 +66,23 @@ public class ServerRemoteRequestHandler {
     public String getAddress() {
         return socket.getInetAddress().getHostAddress();
     }
+
     public int getPort() {
-        return socket.getLocalPort();
+        return socket.getPort();
     }
 
     public void join() throws InterruptedException {
         readFromNode.join();
+    }
+
+    public void sendConnectionRequest(NodeInfo info) {
+        try {
+            info.setServer(true);
+            ConnectionRequest request = new ConnectionRequest(info);
+            out.writeObject(request);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -59,7 +59,7 @@ public class ServerConnectionHandler {
             out.reset();
             out.writeObject(msg);
             out.flush();
-            System.out.println("Socket status " + socket.getInetAddress().isReachable(1));
+            //System.out.println("Socket status " + socket.getInetAddress().isReachable(1));
         } catch (IOException e) {
             e.printStackTrace();
         }
