@@ -20,7 +20,7 @@ public class ClientRemoteRequestHandler {
     public ClientRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException, InterruptedException {
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
-        in = new ObjectInputStream(socket.getInputStream());
+        this.in = new ObjectInputStream(socket.getInputStream());
         this.name = name;
         this.shared = shared;
         start();
@@ -69,6 +69,7 @@ public class ClientRemoteRequestHandler {
     public void sendMessage(Message message) {
         try {
             //out.reset();
+            System.out.println("Client SendMessage: "+ message.getMessage() );
             out.writeObject(message);
             out.flush();
         } catch (IOException e) {

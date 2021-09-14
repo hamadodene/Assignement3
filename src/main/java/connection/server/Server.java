@@ -86,7 +86,9 @@ public class Server {
         messageHandling = new Thread(() -> {
             while (true) {
                 try {
+                    System.out.println("Check queue: queue size is  " + shared.queueSize());
                     Message message = shared.takeMessage();
+                    System.out.println("Send message  " + message.getMessage());
                     crh.sendMessage(message);
                 } catch (InterruptedException e) {
                     e.printStackTrace();

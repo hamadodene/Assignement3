@@ -80,7 +80,10 @@ public class Client {
             while (true) {
                 try {
                     Message message = queue.take();
-                    //Update GUI
+                    //Update GUI here
+                    /**
+                     * TO DO
+                     */
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

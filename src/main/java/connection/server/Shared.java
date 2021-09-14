@@ -43,9 +43,14 @@ public class Shared {
         activeServer.add(nodeInfo);
     }
 
-    public synchronized Message takeMessage() throws InterruptedException {
+    public Message takeMessage() throws InterruptedException {
         return messages.take();
     }
+
+    public int queueSize() {
+        return messages.size();
+    }
+
 
     public void join() throws InterruptedException {
         for(ServerRemoteRequestHandler srr : serverList) {

@@ -16,22 +16,19 @@ public class ServerConnectionHandler {
     private ObjectOutputStream out;
     private MessagesQueue queue;
 
-    public ServerConnectionHandler(Socket socket, MessagesQueue queue) {
+    public ServerConnectionHandler(Socket socket, MessagesQueue queue) throws IOException {
         this.socket = socket;
         this.queue = queue;
-        try {
-            in = new ObjectInputStream(socket.getInputStream());
-            out = new ObjectOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.in = new ObjectInputStream(socket.getInputStream());
+        this.out = new ObjectOutputStream(socket.getOutputStream());
     }
 
     public void start() {
         readFromServer = new Thread(() -> {
             while (true) {
                 try {
-                    processNodeRequest(in.readObject());
+                    Object message = in.readObject();
+                    processNodeRequest(message);
                 } catch (IOException | ClassNotFoundException | InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -47,8 +44,8 @@ public class ServerConnectionHandler {
             System.out.println("Client: encored error during connection " + ((ErrorMessage) in.readObject()).getError());
         } else if (request instanceof Message) {
             Message message = (Message) request;
+            System.out.println("Client node: received message " + message.getMessage());
             queue.add(message);
-            System.out.println("Client: received message " + message);
         }
     }
 
