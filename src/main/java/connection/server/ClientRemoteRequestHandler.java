@@ -16,6 +16,10 @@ public class ClientRemoteRequestHandler {
     private Thread readFromClient;
     private Shared shared;
     private ObjectInputStream in;
+    public boolean connected = false;
+    long lastCheckIn = -1;
+    private int timeout = 1500;
+
 
     public ClientRemoteRequestHandler(Socket socket, String name, Shared shared) throws IOException, InterruptedException {
         this.socket = socket;
@@ -79,5 +83,14 @@ public class ClientRemoteRequestHandler {
 
     public void join() throws InterruptedException {
         readFromClient.join();
+    }
+
+    public void close() {
+        try {
+            out.close();
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -43,6 +43,25 @@ public class Shared {
         activeServer.add(nodeInfo);
     }
 
+    public int activeServerSize() {
+        return activeServer.size();
+    }
+
+    public ArrayList<NodeInfo> getActiveServer() {
+        return activeServer;
+    }
+
+    public ArrayList<ServerRemoteRequestHandler> getServerList() {
+        return serverList;
+    }
+    public void setServerList(ArrayList<ServerRemoteRequestHandler> srr) {
+        serverList = srr;
+    }
+
+    public void setActiveServer(ArrayList<NodeInfo> activeServer) {
+        activeServer = activeServer;
+    }
+
     public Message takeMessage() throws InterruptedException {
         return messages.take();
     }

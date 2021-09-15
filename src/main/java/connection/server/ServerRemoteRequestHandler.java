@@ -3,9 +3,12 @@ package connection.server;
 import connection.message.ConnectionRequest;
 import connection.message.Message;
 import connection.message.NodeInfo;
+import connection.message.NodeInfoList;
+import org.w3c.dom.Node;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class ServerRemoteRequestHandler {
     private Socket socket;
@@ -50,6 +53,10 @@ public class ServerRemoteRequestHandler {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        } else if(request instanceof NodeInfoList) {
+            ArrayList<NodeInfo> nodeList = ((NodeInfoList) request).getActiveNode();
+            shared.setActiveServer(nodeList);
+            System.out.println("Server: Received node list " + shared.getActiveServer().toString());
         }
     }
 
@@ -81,6 +88,16 @@ public class ServerRemoteRequestHandler {
             ConnectionRequest request = new ConnectionRequest(info);
             out.writeObject(request);
             out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void close() {
+        try {
+            out.close();
+            in.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

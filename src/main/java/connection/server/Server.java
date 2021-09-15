@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.*;
 
 public class Server {
     private int port;
@@ -21,7 +22,6 @@ public class Server {
     private ObjectOutputStream out;
     private Thread accept;
     private Thread messageHandling;
-    int count = 0;
 
     public Server(InetAddress address, int backlog, int port) {
         this.address = address;
@@ -66,6 +66,14 @@ public class Server {
             String name = ((ConnectionRequest) request).getNodeInfo().getName();
             if (isServer) {
                 ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name, shared, out, in);
+                if(shared.activeServerSize() > 1) {
+                    ArrayList<NodeInfo> nodeInfo = shared.getActiveServer();
+                    NodeInfo nn = new NodeInfo(address.getHostAddress(),port,name,true);
+                    nodeInfo.add(nn);
+                    NodeInfoList listNodes = new NodeInfoList(nodeInfo);
+                    out.writeObject(listNodes);
+                    out.flush();
+                }
                 shared.addServer(rh);
                 shared.addServerInfo(((ConnectionRequest) request).getNodeInfo());
                 System.out.println("Accepted connection from " + socket.getInetAddress().getHostAddress() + " " + socket.getPort());
@@ -86,9 +94,8 @@ public class Server {
         messageHandling = new Thread(() -> {
             while (true) {
                 try {
-                    System.out.println("Check queue: queue size is  " + shared.queueSize());
                     Message message = shared.takeMessage();
-                    System.out.println("Send message  " + message.getMessage());
+                    System.out.println("Send message to client" + message.getMessage());
                     crh.sendMessage(message);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -106,4 +113,11 @@ public class Server {
         shared.join();
     }
 
+    public void checkConnections() {
+        ArrayList<ServerRemoteRequestHandler> serverList = shared.getServerList();
+        for (ServerRemoteRequestHandler srr : serverList) {
+            //To do
+        }
+        shared.setServerList(serverList);
+    } // checkConnection
 }
