@@ -51,9 +51,6 @@ public class PuzzleBoard extends JFrame {
         
         createTiles(imagePath);
         paintPuzzle(board);
-
-        //Start messages queue processing thread
-        messagesQueueHandling();
     }
 
     
@@ -151,7 +148,7 @@ public class PuzzleBoard extends JFrame {
         System.out.println("Posizioni refresh: " + this.randomPositions);
     }
 
-    public void messagesQueueHandling() {
+    public void startMessagesQueueHandling() {
         messageHandling = new Thread(() -> {
             while (true) {
                 try {
