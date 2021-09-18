@@ -1,9 +1,6 @@
 package connection.server;
 
-import connection.message.ConnectionRequest;
-import connection.message.Message;
-import connection.message.NodeInfo;
-import connection.message.NodeInfoList;
+import connection.message.*;
 import org.w3c.dom.Node;
 
 import java.io.*;
@@ -46,10 +43,10 @@ public class ServerRemoteRequestHandler {
     }
 
     private void processNodeRequest(Object request) {
-        if (request instanceof Message) {
+        if (request instanceof TileMessage) {
             try {
-                System.out.println("Server: received message from another node:  " + ((Message) request).getMessage());
-                shared.add((Message) request);
+                System.out.println("Server: received tile message from another node");
+                shared.add((TileMessage) request);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -87,6 +84,18 @@ public class ServerRemoteRequestHandler {
             info.setServer(true);
             ConnectionRequest request = new ConnectionRequest(info);
             out.writeObject(request);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void sendTile(TileMessage tileMessage) {
+        try {
+            //out.reset();
+            System.out.println("Client Send tile message");
+            out.writeObject(tileMessage);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();

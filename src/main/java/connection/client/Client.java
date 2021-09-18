@@ -1,9 +1,7 @@
 package connection.client;
 
-import connection.message.ConnectionRequest;
-import connection.message.ErrorMessage;
-import connection.message.Message;
-import connection.message.NodeInfo;
+import connection.message.*;
+import game.PuzzleBoard;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -49,7 +47,7 @@ public class Client {
         }
     }
 
-    public synchronized void sendConnectionRequest(String address, int port, String name, boolean isServer) {
+    public void sendConnectionRequest(String address, int port, String name, boolean isServer) {
         NodeInfo nodeInfo;
         if (isServer) {
             nodeInfo = new NodeInfo(address, port, name, true);
@@ -70,6 +68,10 @@ public class Client {
         serverConnectionHandler.sendMessage(message);
     }
 
+    public void sendTileToServer(TileMessage message) {
+        serverConnectionHandler.sendTile(message);
+    }
+
     public void join() throws InterruptedException {
         serverConnectionHandler.join();
         messageHandling.join();
@@ -79,11 +81,7 @@ public class Client {
         messageHandling = new Thread(() -> {
             while (true) {
                 try {
-                    Message message = queue.take();
-                    //Update GUI here
-                    /**
-                     * TO DO
-                     */
+                    TileMessage message = queue.take();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

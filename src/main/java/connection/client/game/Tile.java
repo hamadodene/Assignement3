@@ -1,6 +1,6 @@
-package game;
+package connection.client.game;
 
-import java.awt.Image;
+import java.awt.*;
 
 public class Tile implements Comparable<Tile>{
 	private Image image;

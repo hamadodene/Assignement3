@@ -94,9 +94,9 @@ public class Server {
         messageHandling = new Thread(() -> {
             while (true) {
                 try {
-                    Message message = shared.takeMessage();
-                    System.out.println("Send message to client" + message.getMessage());
-                    crh.sendMessage(message);
+                    TileMessage message = shared.takeMessage();
+                    System.out.println("Send tile message to client");
+                    crh.sendTile(message);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

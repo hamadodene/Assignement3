@@ -2,6 +2,7 @@ package connection.client;
 
 import connection.message.ErrorMessage;
 import connection.message.Message;
+import connection.message.TileMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -42,9 +43,9 @@ public class ServerConnectionHandler {
     private void processNodeRequest(Object request) throws IOException, ClassNotFoundException, InterruptedException {
         if (request instanceof ErrorMessage) {
             System.out.println("Client: encored error during connection " + ((ErrorMessage) in.readObject()).getError());
-        } else if (request instanceof Message) {
-            Message message = (Message) request;
-            System.out.println("Client node: received message " + message.getMessage());
+        } else if (request instanceof TileMessage) {
+            TileMessage message = (TileMessage) request;
+            System.out.println("Client node: received tile message " + message);
             queue.add(message);
         }
     }
@@ -61,6 +62,18 @@ public class ServerConnectionHandler {
             e.printStackTrace();
         }
     }
+
+    public void sendTile(TileMessage tileMessage) {
+        try {
+            out.reset();
+            System.out.println("Client Send tile message");
+            out.writeObject(tileMessage);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void join() throws InterruptedException {
         readFromServer.join();

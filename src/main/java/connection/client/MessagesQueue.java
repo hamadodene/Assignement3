@@ -1,21 +1,21 @@
 package connection.client;
 
-import connection.message.Message;
+import connection.message.TileMessage;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class MessagesQueue {
-    private LinkedBlockingQueue<Message> messages;
+    private LinkedBlockingQueue<TileMessage> messages;
 
     public MessagesQueue() {
         messages = new LinkedBlockingQueue<>();
     }
 
-    public void add(Message message) throws InterruptedException {
+    public void add(TileMessage message) throws InterruptedException {
         messages.put(message);
     }
 
-    public synchronized Message take() throws InterruptedException {
+    public synchronized TileMessage take() throws InterruptedException {
         return messages.take();
     }
 }

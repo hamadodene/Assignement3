@@ -1,4 +1,4 @@
-package game;
+package connection.client.game;
 
 public class SelectionManager {
 

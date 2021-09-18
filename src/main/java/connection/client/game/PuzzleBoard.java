@@ -1,15 +1,12 @@
-package game;
+package connection.client.game;
+
+import connection.client.Client;
+import connection.client.ServerConnectionHandler;
+import connection.message.TileMessage;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
@@ -26,12 +23,14 @@ public class PuzzleBoard extends JFrame {
 	
 	final int rows, columns;
 	private List<Tile> tiles = new ArrayList<>();
+	private Client client;
 	
 	private SelectionManager selectionManager = new SelectionManager();
 	
-    public PuzzleBoard(final int rows, final int columns, final String imagePath) {
+    public PuzzleBoard(final int rows, final int columns, final String imagePath, Client client) {
     	this.rows = rows;
 		this.columns = columns;
+		this.client = client;
     	
     	setTitle("Puzzle");
         setResizable(false);
@@ -91,7 +90,13 @@ public class PuzzleBoard extends JFrame {
             btn.addActionListener(actionListener -> {
             	selectionManager.selectTile(tile, () -> {
             		paintPuzzle(board);
+
+            		//Send message to server for broadcast to all node
+                    TileMessage message = new TileMessage(this.getPositions());
+            		client.sendTileToServer(message);
+
                 	checkSolution();
+
             	});
             });
     	});

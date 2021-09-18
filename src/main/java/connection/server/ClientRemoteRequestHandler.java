@@ -3,6 +3,7 @@ package connection.server;
 import connection.client.MessagesQueue;
 import connection.message.ConnectionRequest;
 import connection.message.Message;
+import connection.message.TileMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,8 +17,6 @@ public class ClientRemoteRequestHandler {
     private Thread readFromClient;
     private Shared shared;
     private ObjectInputStream in;
-    public boolean connected = false;
-    long lastCheckIn = -1;
     private int timeout = 1500;
 
 
@@ -46,15 +45,15 @@ public class ClientRemoteRequestHandler {
     }
 
     private void processNodeRequest(Object request) {
-        if (request instanceof Message) {
-            System.out.println("Server: receive message from client:  " + ((Message) request).getMessage());
-            shared.broadCast((Message) request);
+        if (request instanceof TileMessage) {
+            System.out.println("Server: receive tile message from client, broadcast to all server" );
+            shared.broadCast((TileMessage) request);
         } else if (request instanceof ConnectionRequest) {
             String address = ((ConnectionRequest) request).getNodeInfo().getAddress();
             int port = ((ConnectionRequest) request).getNodeInfo().getPort();
             String name = ((ConnectionRequest) request).getNodeInfo().getName();
 
-            System.out.println("Server: received connection request request for " + address + " " + port);
+            System.out.println("Server: received connection request for " + address + " " + port);
             try {
                 Socket socket = new Socket(address, port);
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
@@ -80,6 +79,18 @@ public class ClientRemoteRequestHandler {
             e.printStackTrace();
         }
     }
+
+    public void sendTile(TileMessage tileMessage) {
+        try {
+            //out.reset();
+            System.out.println("Client Send tile message");
+            out.writeObject(tileMessage);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void join() throws InterruptedException {
         readFromClient.join();

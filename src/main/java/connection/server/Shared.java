@@ -2,6 +2,7 @@ package connection.server;
 
 import connection.message.Message;
 import connection.message.NodeInfo;
+import connection.message.TileMessage;
 import org.w3c.dom.Node;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Shared {
-    private LinkedBlockingQueue<Message> messages;
+    private LinkedBlockingQueue<TileMessage> messages;
     private ArrayList<ServerRemoteRequestHandler> serverList;
     private ArrayList<NodeInfo> activeServer;
 
@@ -19,18 +20,18 @@ public class Shared {
         activeServer = new ArrayList<>();
     }
 
-    public void broadCast(Message message) {
+    public void broadCast(TileMessage message) {
         Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
         while (it.hasNext()) {
             ServerRemoteRequestHandler srh = it.next();
             // writeUnshared() is like writeObject(), but always writes
-            System.out.println("Server: Broadcast message to " + srh.getAddress() + ":" + srh.getPort());
+            System.out.println("Server: Broadcast tile message to " + srh.getAddress() + ":" + srh.getPort());
             // a new copy of the object
-            srh.sendMessage(message);
+            srh.sendTile(message);
         }
     }
 
-    public void add(Message message) throws InterruptedException {
+    public void add(TileMessage message) throws InterruptedException {
         System.out.println("Server: added message on queue");
         messages.put(message);
     }
@@ -62,7 +63,7 @@ public class Shared {
         activeServer = activeServer;
     }
 
-    public Message takeMessage() throws InterruptedException {
+    public TileMessage takeMessage() throws InterruptedException {
         return messages.take();
     }
 
