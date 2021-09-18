@@ -66,7 +66,7 @@ public class ServerConnectionHandler {
     public void sendTile(TileMessage tileMessage) {
         try {
             out.reset();
-            System.out.println("Client Send tile message");
+            System.out.println("Client Send tile message: " + tileMessage.toString());
             out.writeObject(tileMessage);
             out.flush();
         } catch (IOException e) {

@@ -1,7 +1,8 @@
 package connection.client.game;
 
 import connection.client.Client;
-import connection.client.ServerConnectionHandler;
+import connection.client.MessagesQueue;
+import connection.client.utility.UtilityFunctions;
 import connection.message.TileMessage;
 
 import javax.imageio.ImageIO;
@@ -23,32 +24,40 @@ public class PuzzleBoard extends JFrame {
 	
 	final int rows, columns;
 	private List<Tile> tiles = new ArrayList<>();
-	private Client client;
-	
+    private final UtilityFunctions uFunctions = UtilityFunctions.getInstance();
+    private List<Integer> randomPositions;
+    private BufferedImage image;
+    private Client client;
+    private Thread messageHandling;
+    private MessagesQueue queue;
+    private final JPanel board;
 	private SelectionManager selectionManager = new SelectionManager();
 	
-    public PuzzleBoard(final int rows, final int columns, final String imagePath, Client client) {
+    public PuzzleBoard(final int rows, final int columns, final String imagePath, Client client, MessagesQueue queue, List<Integer> randomPositions) {
     	this.rows = rows;
 		this.columns = columns;
 		this.client = client;
+		this.randomPositions = randomPositions;
+		this.queue = queue;
     	
     	setTitle("Puzzle");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        final JPanel board = new JPanel();
+        board = new JPanel();
+
         board.setBorder(BorderFactory.createLineBorder(Color.gray));
         board.setLayout(new GridLayout(rows, columns, 0, 0));
         getContentPane().add(board, BorderLayout.CENTER);
         
         createTiles(imagePath);
         paintPuzzle(board);
+
+        //Start messages queue processing thread
+        messagesQueueHandling();
     }
 
     
     private void createTiles(final String imagePath) {
-		final BufferedImage image;
-        
         try {
             image = ImageIO.read(new File(imagePath));
         } catch (IOException ex) {
@@ -77,6 +86,7 @@ public class PuzzleBoard extends JFrame {
                 position++;
             }
         }
+
 	}
     
     private void paintPuzzle(final JPanel board) {
@@ -113,5 +123,56 @@ public class PuzzleBoard extends JFrame {
     	if(tiles.stream().allMatch(Tile::isInRightPlace)) {
     		JOptionPane.showMessageDialog(this, "Puzzle Completed!", "", JOptionPane.INFORMATION_MESSAGE);
     	}
+    }
+
+    private void refreshPuzzle(){
+        final int imageWidth = image.getWidth(null);
+        final int imageHeight = image.getHeight(null);
+
+        int position = 0;
+
+        List<Tile> newTiles = new ArrayList<>();
+
+        List<Integer> newPositions = uFunctions.convert(randomPositions);
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                final Image imagePortion = createImage(new FilteredImageSource(image.getSource(),
+                        new CropImageFilter(j * imageWidth / columns,
+                                i * imageHeight / rows,
+                                (imageWidth / columns),
+                                imageHeight / rows)));
+
+                newTiles.add(new Tile(imagePortion, position, newPositions.get(position)));
+                position++;
+            }
+        }
+        this.tiles = newTiles;
+        System.out.println("Posizioni refresh: " + this.randomPositions);
+    }
+
+    public void messagesQueueHandling() {
+        messageHandling = new Thread(() -> {
+            while (true) {
+                try {
+                    TileMessage message = queue.take();
+                    List<Integer> remoteRandomPosition = message.getTiles();
+                    if(!this.randomPositions.equals(remoteRandomPosition)) {
+                        this.randomPositions = remoteRandomPosition;
+                        this.refreshPuzzle();
+                        this.paintPuzzle(this.board);
+                        System.out.println("Refresh Tiles completed");
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        messageHandling.setDaemon(true);
+        messageHandling.start();
+    }
+
+    public void join() throws InterruptedException {
+        messageHandling.join();
     }
 }

@@ -1,5 +1,6 @@
 package connection.server;
 
+import connection.client.game.Tile;
 import connection.message.*;
 import org.w3c.dom.Node;
 
@@ -45,25 +46,16 @@ public class ServerRemoteRequestHandler {
     private void processNodeRequest(Object request) {
         if (request instanceof TileMessage) {
             try {
-                System.out.println("Server: received tile message from another node");
-                shared.add((TileMessage) request);
+                TileMessage message = (TileMessage) request;
+                System.out.println("Server: received tile message from another node: " + message.toString());
+                shared.add(message);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } else if(request instanceof NodeInfoList) {
+        } else if (request instanceof NodeInfoList) {
             ArrayList<NodeInfo> nodeList = ((NodeInfoList) request).getActiveNode();
             shared.setActiveServer(nodeList);
             System.out.println("Server: Received node list " + shared.getActiveServer().toString());
-        }
-    }
-
-    public void sendMessage(Message message) {
-        try {
-            //out.reset();
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -93,15 +85,13 @@ public class ServerRemoteRequestHandler {
 
     public void sendTile(TileMessage tileMessage) {
         try {
-            //out.reset();
-            System.out.println("Client Send tile message");
+            System.out.println("Client Send tile message: " + tileMessage.toString());
             out.writeObject(tileMessage);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
     public void close() {
         try {

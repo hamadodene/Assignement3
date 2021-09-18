@@ -1,5 +1,3 @@
-package connection;
-
 import connection.client.Client;
 import connection.client.MessagesQueue;
 import connection.client.game.PuzzleBoard;
@@ -11,17 +9,19 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Main {
+public class Main2 {
     public static void main(String[] args) throws IOException, InterruptedException {
         InetAddress address = Inet4Address.getLocalHost();
-        Server server = new Server(address, 0, 8080);
+        Server server = new Server(address, 0, 8081);
         server.start();
 
         MessagesQueue queue = new MessagesQueue();
         List<Integer> randomPositions = new ArrayList<>();
 
-        Client client = new Client(Inet4Address.getLocalHost().getHostAddress(), 8080, "Hamado", queue);
+        Client client = new Client(Inet4Address.getLocalHost().getHostAddress(), 8081, "Hamado2", queue);
         client.start();
+
+        client.sendConnectionRequest(address.getHostAddress(), 8080,"boh", true);
 
         final int n = 3;
         final int m = 5;

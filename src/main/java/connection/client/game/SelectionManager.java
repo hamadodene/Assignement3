@@ -2,41 +2,31 @@ package connection.client.game;
 
 public class SelectionManager {
 
-	private boolean selectionActive = false;
-	private Tile selectedTile;
+    private boolean selectionActive = false;
+    private Tile selectedTile;
 
-	public void selectTile(final Tile tile, final Listener listener) {
-		
-		if(selectionActive) {
-			selectionActive = false;
-			
-			swap(selectedTile, tile);
-			
-			listener.onSwapPerformed();
-		} else {
-			selectionActive = true;
-			selectedTile = tile;
-		}
-	}
+    public void selectTile(final Tile tile, final Listener listener) {
 
-	//Set position here when receive a new position
-	private void swap(final Tile t1, final Tile t2) {
-		int pos = t1.getCurrentPosition();
-		t1.setCurrentPosition(t2.getCurrentPosition());
-		t2.setCurrentPosition(pos);
-		System.out.println("Swapped:" + t1.getOriginalPosition() + " - " + t2.getOriginalPosition() );
-	}
+        if (selectionActive) {
+            selectionActive = false;
 
-	public Tile getSelectedTile() {
-		return selectedTile;
-	}
+            swap(selectedTile, tile);
 
-	public void setSelectedTile(Tile selectedTile) {
-		this.selectedTile = selectedTile;
-	}
+            listener.onSwapPerformed();
+        } else {
+            selectionActive = true;
+            selectedTile = tile;
+        }
+    }
 
-	@FunctionalInterface
-	interface Listener{
-		void onSwapPerformed();
-	}
+    private void swap(final Tile t1, final Tile t2) {
+        int pos = t1.getCurrentPosition();
+        t1.setCurrentPosition(t2.getCurrentPosition());
+        t2.setCurrentPosition(pos);
+    }
+
+    @FunctionalInterface
+    interface Listener {
+        void onSwapPerformed();
+    }
 }

@@ -1,8 +1,6 @@
 package connection.server;
 
-import connection.client.MessagesQueue;
 import connection.message.ConnectionRequest;
-import connection.message.Message;
 import connection.message.TileMessage;
 
 import java.io.IOException;
@@ -46,8 +44,9 @@ public class ClientRemoteRequestHandler {
 
     private void processNodeRequest(Object request) {
         if (request instanceof TileMessage) {
-            System.out.println("Server: receive tile message from client, broadcast to all server" );
-            shared.broadCast((TileMessage) request);
+            TileMessage message = (TileMessage) request;
+            System.out.println("Server: receive tile message from client, broadcast to all server: " + message.toString() );
+            shared.broadCast(message);
         } else if (request instanceof ConnectionRequest) {
             String address = ((ConnectionRequest) request).getNodeInfo().getAddress();
             int port = ((ConnectionRequest) request).getNodeInfo().getPort();
@@ -69,21 +68,9 @@ public class ClientRemoteRequestHandler {
         }
     }
 
-    public void sendMessage(Message message) {
-        try {
-            //out.reset();
-            System.out.println("Client SendMessage: "+ message.getMessage() );
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void sendTile(TileMessage tileMessage) {
         try {
-            //out.reset();
-            System.out.println("Client Send tile message");
+            System.out.println("Client Send tile message: " + tileMessage.toString());
             out.writeObject(tileMessage);
             out.flush();
         } catch (IOException e) {

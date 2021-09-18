@@ -19,13 +19,11 @@ public class Client {
     private MessagesQueue queue;
     private Thread messageHandling;
 
-    public Client(String address, int port, String name) {
+    public Client(String address, int port, String name, MessagesQueue queue) {
         this.address = address;
         this.port = port;
         this.name = name;
-        this.queue = new MessagesQueue();
-        //Start messages queue processing thread
-        messagesQueueHandling();
+        this.queue = queue;
     }
 
     public void start() {
@@ -64,30 +62,11 @@ public class Client {
         }
     }
 
-    public void sendRequestToServer(String message) {
-        serverConnectionHandler.sendMessage(message);
-    }
-
     public void sendTileToServer(TileMessage message) {
         serverConnectionHandler.sendTile(message);
     }
 
     public void join() throws InterruptedException {
         serverConnectionHandler.join();
-        messageHandling.join();
-    }
-
-    public void messagesQueueHandling() {
-        messageHandling = new Thread(() -> {
-            while (true) {
-                try {
-                    TileMessage message = queue.take();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        messageHandling.setDaemon(true);
-        messageHandling.start();
     }
 }
