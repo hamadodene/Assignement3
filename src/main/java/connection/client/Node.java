@@ -24,9 +24,10 @@ public class Node {
     private int n;
     private int m;
     private String imagePath;
-    private  Client client;
+    private Client client;
     private List<Integer> randomPositions;
     private PuzzleBoard puzzle;
+    private boolean serverIsReady = false;
 
 
     public static void main(String[] args) {
@@ -44,7 +45,7 @@ public class Node {
         this.m = m;
         this.imagePath = imagePath;
         this.randomPositions = new ArrayList<>();
-        initiazeNode();
+        initializeNode();
     }
 
     private void startMainMenu() {
@@ -98,7 +99,7 @@ public class Node {
     }
 
     public void startNewGame() {
-        if(client.isClientIsConnected()) {
+        if (client.isClientIsConnected()) {
             //Start gui
             puzzle = new PuzzleBoard(n, m, imagePath, client, messagesQueue, randomPositions);
             puzzle.setVisible(true);
@@ -111,11 +112,18 @@ public class Node {
     private void joinGame() {
         String remoteIp = ip.getText();
         int remotePort = Integer.parseInt(port.getText());
-        client.sendConnectionRequest(remoteIp, remotePort, nodeName, true);
+        if (client.isClientIsConnected()) {
+            client.sendConnectionRequest(remoteIp, remotePort, nodeName, true);
+
+            while (!serverIsReady) {
+                System.out.println("Mi sto allineando con il server remoto");
+            }
+            System.out.println("Mi sono allineato al server remoto");
+        }
     }
 
     //Join for message queue handling thread
-    public  void join() throws InterruptedException {
+    public void join() throws InterruptedException {
         puzzle.join();
     }
 }
