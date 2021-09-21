@@ -1,14 +1,13 @@
 package connection.client;
 
-import connection.client.game.PuzzleBoard;
-import connection.message.*;
+import connection.message.ConnectionRequest;
+import connection.message.NodeInfo;
+import connection.message.TileMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Client {
     private String name;
@@ -19,22 +18,14 @@ public class Client {
     private ObjectOutputStream out;
     private ServerConnectionHandler serverConnectionHandler;
     private MessagesQueue queue;
-    private final int n;
-    private final int m;
-    private final String imagePath;
-    private List<Integer> randomPositions;
-    private PuzzleBoard puzzle;
+    private boolean clientIsConnected = false;
 
 
-    public Client(String address, int port, String name, MessagesQueue queue, int n, int m, String imagePath) {
+    public Client(String address, int port, String name) {
         this.address = address;
         this.port = port;
         this.name = name;
         this.queue = queue;
-        this.m = m;
-        this.n = n;
-        this.imagePath = imagePath;
-        this.randomPositions = new ArrayList<>();
     }
 
     public void start() {
@@ -51,15 +42,12 @@ public class Client {
             serverConnectionHandler = new ServerConnectionHandler(toServer, queue);
             serverConnectionHandler.start();
 
-            //Start gui
-            puzzle = new  PuzzleBoard(n, m, imagePath, this, queue, randomPositions);
-            puzzle.setVisible(true);
-
-            //Start messages queue processing thread
-            puzzle.startMessagesQueueHandling();
+            clientIsConnected = true;
 
         } catch (Exception ex) {
+            clientIsConnected = false;
             ex.printStackTrace();
+
         }
     }
 
@@ -86,6 +74,9 @@ public class Client {
 
     public void join() throws InterruptedException {
         serverConnectionHandler.join();
-        puzzle.join();
+    }
+
+    public boolean isClientIsConnected() {
+        return clientIsConnected;
     }
 }

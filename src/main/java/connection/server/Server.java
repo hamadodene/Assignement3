@@ -22,6 +22,7 @@ public class Server {
     private ObjectOutputStream out;
     private Thread accept;
     private Thread messageHandling;
+    private boolean serverStart = false;
 
     public Server(InetAddress address, int backlog, int port) {
         this.address = address;
@@ -33,7 +34,10 @@ public class Server {
 
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, backlog, address);
-        System.out.println("Start server: " + serverSocket.getInetAddress().getHostAddress() + " " + serverSocket.getLocalPort());
+        if(serverSocket.isBound()) {
+            System.out.println("Start server: " + serverSocket.getInetAddress().getHostAddress() + " " + serverSocket.getLocalPort());
+            serverStart = true;
+        }
         accept = new Thread(() -> {
             while (true) {
                 try {
@@ -120,4 +124,8 @@ public class Server {
         }
         shared.setServerList(serverList);
     } // checkConnection
+
+    public boolean isServerStart() {
+        return serverStart;
+    }
 }
