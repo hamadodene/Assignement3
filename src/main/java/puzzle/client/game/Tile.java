@@ -1,4 +1,4 @@
-package connection.client.game;
+package puzzle.client.game;
 
 import java.awt.*;
 

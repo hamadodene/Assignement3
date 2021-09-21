@@ -1,6 +1,6 @@
-package connection.client.utility;
+package puzzle.client.utility;
 
-import connection.client.game.Tile;
+import puzzle.client.game.Tile;
 
 import java.util.List;
 import java.util.stream.Collectors;

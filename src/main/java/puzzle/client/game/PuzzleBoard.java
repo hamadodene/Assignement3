@@ -1,9 +1,9 @@
-package connection.client.game;
+package puzzle.client.game;
 
-import connection.client.Client;
-import connection.client.MessagesQueue;
-import connection.client.utility.UtilityFunctions;
-import connection.message.TileMessage;
+import puzzle.client.Client;
+import puzzle.client.MessagesQueue;
+import puzzle.client.utility.UtilityFunctions;
+import puzzle.message.TileMessage;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -83,7 +83,6 @@ public class PuzzleBoard extends JFrame {
                 position++;
             }
         }
-
 	}
     
     private void paintPuzzle(final JPanel board) {

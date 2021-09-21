@@ -1,8 +1,7 @@
-package connection.client;
+package puzzle.client;
 
-import connection.message.ErrorMessage;
-import connection.message.Message;
-import connection.message.TileMessage;
+import puzzle.message.ErrorMessage;
+import puzzle.message.TileMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,6 +21,7 @@ public class ServerConnectionHandler {
         this.queue = queue;
         this.in = new ObjectInputStream(socket.getInputStream());
         this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.queue = queue;
     }
 
     public void start() {
@@ -47,19 +47,6 @@ public class ServerConnectionHandler {
             TileMessage message = (TileMessage) request;
             System.out.println("Client node: received tile message " + message);
             queue.add(message);
-        }
-    }
-
-    public void sendMessage(String message) {
-        Message msg = new Message(message, false);
-        try {
-            System.out.println("Send message " + msg.getMessage());
-            out.reset();
-            out.writeObject(msg);
-            out.flush();
-            //System.out.println("Socket status " + socket.getInetAddress().isReachable(1));
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

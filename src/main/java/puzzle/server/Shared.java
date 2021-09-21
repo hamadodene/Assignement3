@@ -1,9 +1,7 @@
-package connection.server;
+package puzzle.server;
 
-import connection.message.Message;
-import connection.message.NodeInfo;
-import connection.message.TileMessage;
-import org.w3c.dom.Node;
+import puzzle.message.NodeInfo;
+import puzzle.message.TileMessage;
 
 import java.util.ArrayList;
 import java.util.Iterator;

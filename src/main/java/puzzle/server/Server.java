@@ -1,6 +1,6 @@
-package connection.server;
+package puzzle.server;
 
-import connection.message.*;
+import puzzle.message.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

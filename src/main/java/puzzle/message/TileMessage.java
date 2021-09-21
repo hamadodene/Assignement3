@@ -1,4 +1,4 @@
-package connection.message;
+package puzzle.message;
 
 import java.io.Serializable;
 import java.util.List;

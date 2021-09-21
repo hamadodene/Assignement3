@@ -1,7 +1,7 @@
-package connection.client;
+package puzzle.client;
 
-import connection.client.game.PuzzleBoard;
-import connection.server.Server;
+import puzzle.client.game.PuzzleBoard;
+import puzzle.server.Server;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -29,12 +29,6 @@ public class Node {
     private PuzzleBoard puzzle;
     private boolean serverIsReady = false;
 
-
-    public static void main(String[] args) {
-        Node node = new Node("Node Hamado");
-        node.startMainMenu();
-    }
-
     public Node(String nodeName, InetAddress serverAddress, int serverPort, int backlog, int n, int m, String imagePath) throws IOException {
         this.nodeName = nodeName;
         this.serverAddress = serverAddress;
@@ -46,6 +40,7 @@ public class Node {
         this.imagePath = imagePath;
         this.randomPositions = new ArrayList<>();
         initializeNode();
+        startMainMenu();
     }
 
     private void startMainMenu() {
@@ -53,7 +48,7 @@ public class Node {
         JFrame frame = new JFrame(nodeName);
 
         //new Game
-        createButton = new JButton("Start new Game");
+        createButton = new JButton("Start Game");
         createButton.setBounds(50, 50, 200, 50);
 
         //Join another game
@@ -79,12 +74,20 @@ public class Node {
 
         createButton.addActionListener(e -> {
             frame.setVisible(false);
-            //this.newGame();
+            try {
+                startGame();
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
         });
 
         joinButton.addActionListener(e -> {
             frame.setVisible(false);
-            //this.joinGame();
+            try {
+                joinGame();
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
         });
     }
 
@@ -93,12 +96,12 @@ public class Node {
         server.start();
 
         if (server.isServerStart()) {
-            client = new Client(serverAddress.getHostAddress(), serverPort, nodeName);
+            client = new Client(serverAddress.getHostAddress(), serverPort, nodeName, messagesQueue);
             client.start();
         }
     }
 
-    public void startNewGame() {
+    public void startGame() throws InterruptedException {
         if (client.isClientIsConnected()) {
             //Start gui
             puzzle = new PuzzleBoard(n, m, imagePath, client, messagesQueue, randomPositions);
@@ -106,24 +109,53 @@ public class Node {
 
             //Start messages queue processing thread
             puzzle.startMessagesQueueHandling();
+            //puzzle.join();
         }
     }
 
-    private void joinGame() {
+    private void joinGame() throws InterruptedException {
         String remoteIp = ip.getText();
-        int remotePort = Integer.parseInt(port.getText());
+        int remotePort = 0;
+        try {
+            remotePort = Integer.parseInt(port.getText());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(new JFrame(), "Port not valid", "Port validation", JOptionPane.ERROR_MESSAGE);
+        }
+
+        if (!validIP(remoteIp)) {
+            JOptionPane.showMessageDialog(new JFrame(), "IP not valid", "Ip validation", JOptionPane.ERROR_MESSAGE);
+        }
+
         if (client.isClientIsConnected()) {
             client.sendConnectionRequest(remoteIp, remotePort, nodeName, true);
-
-            while (!serverIsReady) {
-                System.out.println("Mi sto allineando con il server remoto");
-            }
-            System.out.println("Mi sono allineato al server remoto");
+            startGame();
         }
     }
 
-    //Join for message queue handling thread
-    public void join() throws InterruptedException {
-        puzzle.join();
+    public static boolean validIP(String ip) {
+        try {
+            if (ip == null || ip.isEmpty()) {
+                return false;
+            }
+
+            String[] parts = ip.split("\\.");
+            if (parts.length != 4) {
+                return false;
+            }
+
+            for (String s : parts) {
+                int i = Integer.parseInt(s);
+                if ((i < 0) || (i > 255)) {
+                    return false;
+                }
+            }
+            if (ip.endsWith(".")) {
+                return false;
+            }
+
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
     }
 }

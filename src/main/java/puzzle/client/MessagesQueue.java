@@ -1,6 +1,6 @@
-package connection.client;
+package puzzle.client;
 
-import connection.message.TileMessage;
+import puzzle.message.TileMessage;
 
 import java.util.concurrent.LinkedBlockingQueue;
 

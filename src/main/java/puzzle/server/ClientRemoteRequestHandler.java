@@ -1,7 +1,7 @@
-package connection.server;
+package puzzle.server;
 
-import connection.message.ConnectionRequest;
-import connection.message.TileMessage;
+import puzzle.message.ConnectionRequest;
+import puzzle.message.TileMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

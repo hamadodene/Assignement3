@@ -1,8 +1,6 @@
-package connection.server;
+package puzzle.server;
 
-import connection.client.game.Tile;
-import connection.message.*;
-import org.w3c.dom.Node;
+import puzzle.message.*;
 
 import java.io.*;
 import java.net.Socket;

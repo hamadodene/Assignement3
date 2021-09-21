@@ -1,8 +1,8 @@
-package connection.client;
+package puzzle.client;
 
-import connection.message.ConnectionRequest;
-import connection.message.NodeInfo;
-import connection.message.TileMessage;
+import puzzle.message.ConnectionRequest;
+import puzzle.message.NodeInfo;
+import puzzle.message.TileMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,7 +21,7 @@ public class Client {
     private boolean clientIsConnected = false;
 
 
-    public Client(String address, int port, String name) {
+    public Client(String address, int port, String name, MessagesQueue queue) {
         this.address = address;
         this.port = port;
         this.name = name;
