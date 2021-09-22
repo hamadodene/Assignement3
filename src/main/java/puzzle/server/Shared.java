@@ -1,6 +1,8 @@
 package puzzle.server;
 
+import puzzle.message.Message;
 import puzzle.message.NodeInfo;
+import puzzle.message.RicartAgrawalaMessage;
 import puzzle.message.TileMessage;
 
 import java.util.ArrayList;
@@ -26,6 +28,16 @@ public class Shared {
             System.out.println("Server: Broadcast tile message to " + srh.getAddress() + ":" + srh.getPort());
             // a new copy of the object
             srh.sendTile(message);
+        }
+    }
+
+    public void sendRequest(String request, Message type) {
+        Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
+        while (it.hasNext()) {
+            ServerRemoteRequestHandler srh = it.next();
+            RicartAgrawalaMessage message = new RicartAgrawalaMessage(request, type);
+            // a new copy of the object
+            srh.sendAgrawalaMessage(message);
         }
     }
 

@@ -41,7 +41,7 @@ public class ServerRemoteRequestHandler {
         readFromNode.start();
     }
 
-    private void processNodeRequest(Object request) {
+    private void processNodeRequest(Object request) throws IOException {
         if (request instanceof TileMessage) {
             try {
                 TileMessage message = (TileMessage) request;
@@ -51,9 +51,32 @@ public class ServerRemoteRequestHandler {
                 e.printStackTrace();
             }
         } else if (request instanceof NodeInfoList) {
+            System.out.println("Server: Received node list " + shared.getActiveServer().toString());
             ArrayList<NodeInfo> nodeList = ((NodeInfoList) request).getActiveNode();
             shared.setActiveServer(nodeList);
-            System.out.println("Server: Received node list " + shared.getActiveServer().toString());
+            //Open connection with all node
+            for(NodeInfo node : nodeList) {
+                initializeConnectionWithNode(node, request);
+            }
+        } else if(request instanceof RicartAgrawalaMessage) {
+            Message type = ((RicartAgrawalaMessage) request).getType();
+            String message = ((RicartAgrawalaMessage) request).getMessage();
+            switch (type) {
+                case REQUEST:
+                    System.out.println("Receive Agrawala REQUEST, check");
+                    break;
+                case PERMIT:
+                    System.out.println("Receive permit");
+                    //add response to list
+                    break;
+                case NOTPERMIT:
+                    System.out.println("Receive not permit message");
+                    //ad response to list
+                    //We will check list with another thread
+                    break;
+
+                default:
+            }
         }
     }
 
@@ -90,6 +113,27 @@ public class ServerRemoteRequestHandler {
             e.printStackTrace();
         }
     }
+
+    public void sendAgrawalaMessage(RicartAgrawalaMessage message) {
+        try {
+            System.out.println("Send Agrawala" + message.getType());
+            out.writeObject(message);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initializeConnectionWithNode(NodeInfo node, Object request) throws IOException {
+        Socket socket = new Socket(node.getAddress(), node.getPort());
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+        ServerRemoteRequestHandler srr = new ServerRemoteRequestHandler(socket, name, shared, out, in);
+        srr.sendConnectionRequest(((ConnectionRequest) request).getNodeInfo());
+        shared.addServer(srr);
+        System.out.println("Initialize connection for " + node.getAddress() + ":" + node.getPort());
+    }
+
 
     public void close() {
         try {

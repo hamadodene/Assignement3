@@ -1,6 +1,7 @@
 package puzzle.server;
 
 import puzzle.message.ConnectionRequest;
+import puzzle.message.Message;
 import puzzle.message.TileMessage;
 
 import java.io.IOException;
@@ -45,8 +46,12 @@ public class ClientRemoteRequestHandler {
     private void processNodeRequest(Object request) {
         if (request instanceof TileMessage) {
             TileMessage message = (TileMessage) request;
-            System.out.println("Server: receive tile message from client, broadcast to all server: " + message.toString() );
-            shared.broadCast(message);
+            //System.out.println("Server: receive tile message from client, broadcast to all server: " + message.toString() );
+            //shared.broadCast(message);
+
+            //Send REQUEST to all server
+            shared.sendRequest(message.toString(), Message.REQUEST);
+
         } else if (request instanceof ConnectionRequest) {
             String address = ((ConnectionRequest) request).getNodeInfo().getAddress();
             int port = ((ConnectionRequest) request).getNodeInfo().getPort();
@@ -77,7 +82,6 @@ public class ClientRemoteRequestHandler {
             e.printStackTrace();
         }
     }
-
 
     public void join() throws InterruptedException {
         readFromClient.join();
