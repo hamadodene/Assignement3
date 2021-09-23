@@ -96,9 +96,9 @@ public class PuzzleBoard extends JFrame {
             btn.addActionListener(actionListener -> {
             	selectionManager.selectTile(tile, () -> {
             		paintPuzzle(board);
-
+                    System.out.println("Position first " + tile.getCurrentPosition() + " Postion second " + selectionManager.getSecondTilePosition() );
             		//Send message to server for broadcast to all node
-                    TileMessage message = new TileMessage(this.getPositions());
+                    TileMessage message = new TileMessage(this.getPositions(), tile.getCurrentPosition(), selectionManager.getSecondTilePosition() );
             		client.sendTileToServer(message);
 
                 	checkSolution();

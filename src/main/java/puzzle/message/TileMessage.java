@@ -1,21 +1,23 @@
 package puzzle.message;
 
+import puzzle.server.TimeStamp;
+
 import java.io.Serializable;
 import java.util.List;
 
 public class TileMessage implements Serializable {
     private List<Integer> tiles;
+    private int positionFirstPuzzle;
+    private int positionSecondPuzzle;
 
-    public TileMessage(List<Integer> tiles) {
+    public TileMessage(List<Integer> tiles,int positionFirstPuzzle, int positionSecondPuzzle) {
         this.tiles = tiles;
+        this.positionFirstPuzzle = positionFirstPuzzle;
+        this.positionSecondPuzzle = positionSecondPuzzle;
     }
 
     public List<Integer> getTiles() {
         return tiles;
-    }
-
-    public void setTiles(List<Integer> tiles) {
-        this.tiles = tiles;
     }
 
     @Override

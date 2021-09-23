@@ -16,7 +16,7 @@ public class Server {
     private ServerSocket serverSocket;
     private Socket socket;
     private int backlog;
-    private Shared shared;
+    private ServerManager serverManager;
     private ClientRemoteRequestHandler crh;
     private ObjectInputStream in;
     private ObjectOutputStream out;
@@ -28,7 +28,7 @@ public class Server {
         this.address = address;
         this.backlog = backlog;
         this.port = port;
-        shared = new Shared();
+        serverManager = new ServerManager();
         messagesQueueHandling();
     }
 
@@ -68,22 +68,23 @@ public class Server {
         if (request instanceof ConnectionRequest) {
             boolean isServer = ((ConnectionRequest) request).getNodeInfo().isServer();
             String name = ((ConnectionRequest) request).getNodeInfo().getName();
-            if (isServer) {
-                ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name, shared, out, in);
-                if(shared.activeServerSize() > 1) {
-                    ArrayList<NodeInfo> nodeInfo = shared.getActiveServer();
+            boolean alreadyHaveNodeList = ((ConnectionRequest) request).getAlreadyHaveNodeList();
+            if (isServer ) {
+                ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name, serverManager, out, in);
+                if(serverManager.activeServerSize() > 1 && !alreadyHaveNodeList) {
+                    ArrayList<NodeInfo> nodeInfo = serverManager.getActiveServer();
                     NodeInfo nn = new NodeInfo(address.getHostAddress(),port,name,true);
                     nodeInfo.add(nn);
                     NodeInfoList listNodes = new NodeInfoList(nodeInfo);
                     out.writeObject(listNodes);
                     out.flush();
                 }
-                shared.addServer(rh);
-                shared.addServerInfo(((ConnectionRequest) request).getNodeInfo());
+                serverManager.addServer(rh);
+                serverManager.addServerInfo(((ConnectionRequest) request).getNodeInfo());
                 System.out.println("Accepted connection from " + socket.getInetAddress().getHostAddress() + " " + socket.getPort());
             } else {
                 System.out.println("Server: Initialize connection with client");
-                crh = new ClientRemoteRequestHandler(socket, name, shared);
+                crh = new ClientRemoteRequestHandler(socket, name, serverManager);
             }
         } else {
             ErrorMessage error = new ErrorMessage("Need Connection request before start", -1);
@@ -98,7 +99,7 @@ public class Server {
         messageHandling = new Thread(() -> {
             while (true) {
                 try {
-                    TileMessage message = shared.takeMessage();
+                    TileMessage message = serverManager.takeMessage();
                     System.out.println("Send tile message to client: " + message.toString());
                     crh.sendTile(message);
                 } catch (InterruptedException e) {
@@ -114,15 +115,15 @@ public class Server {
         accept.join();
         messageHandling.join();
         crh.join();
-        shared.join();
+        serverManager.join();
     }
 
     public void checkConnections() {
-        ArrayList<ServerRemoteRequestHandler> serverList = shared.getServerList();
+        ArrayList<ServerRemoteRequestHandler> serverList = serverManager.getServerList();
         for (ServerRemoteRequestHandler srr : serverList) {
             //To do
         }
-        shared.setServerList(serverList);
+        serverManager.setServerList(serverList);
     } // checkConnection
 
     public boolean isServerStart() {

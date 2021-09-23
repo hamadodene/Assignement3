@@ -58,7 +58,7 @@ public class Client {
         } else {
             nodeInfo = new NodeInfo(address, port, name, false);
         }
-        ConnectionRequest conn = new ConnectionRequest(nodeInfo);
+        ConnectionRequest conn = new ConnectionRequest(nodeInfo, false);
         try {
             out.reset();
             out.writeObject(conn);
