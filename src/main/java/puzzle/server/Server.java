@@ -99,7 +99,7 @@ public class Server {
         messageHandling = new Thread(() -> {
             while (true) {
                 try {
-                    TileMessage message = serverManager.takeMessage();
+                    TileMessage message = serverManager.takeServerMessage();
                     System.out.println("Send tile message to client: " + message.toString());
                     crh.sendTile(message);
                 } catch (InterruptedException e) {

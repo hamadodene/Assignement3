@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 public class ServerRemoteRequestHandler {
     private Socket socket;
@@ -17,8 +16,6 @@ public class ServerRemoteRequestHandler {
     private ServerManager serverManager;
     private ObjectInputStream in;
     private ArrayList<Message> recvdMsgTokens;
-    private List<Integer> tiles;
-    private TimeStamp myTimeStamp;
 
     public ServerRemoteRequestHandler(Socket socket, String name, ServerManager serverManager, ObjectOutputStream out, ObjectInputStream in) throws IOException {
         this.socket = socket;
@@ -26,8 +23,7 @@ public class ServerRemoteRequestHandler {
         this.in = in;
         this.name = name;
         this.serverManager = serverManager;
-        tiles = new ArrayList<>();
-        recvdMsgTokens = new ArrayList<Message>();
+        recvdMsgTokens = new ArrayList<>();
         start();
     }
 
@@ -49,22 +45,19 @@ public class ServerRemoteRequestHandler {
 
     private void processNodeRequest(Object request) throws IOException, InterruptedException {
         if (request instanceof TileMessage) {
-            try {
-                TileMessage message = (TileMessage) request;
-                System.out.println("Server: received tile message from another node: " + message.toString());
-                serverManager.saveTileMessage(message);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            TileMessage message = (TileMessage) request;
+            System.out.println("Server: received tile message from another node: " + message.toString());
+            serverManager.saveServerTileMessage(message);
+            //clientMessage.add(message);
         } else if (request instanceof NodeInfoList) {
             System.out.println("Server: Received node list " + serverManager.getActiveServer().toString());
             ArrayList<NodeInfo> nodeList = ((NodeInfoList) request).getActiveNode();
             serverManager.setActiveServer(nodeList);
             //Open connection with all node
-            for(NodeInfo node : nodeList) {
+            for (NodeInfo node : nodeList) {
                 initializeConnectionWithNode(node, request);
             }
-        } else if(request instanceof RicartAgrawalaMessage) {
+        } else if (request instanceof RicartAgrawalaMessage) {
             Message type = ((RicartAgrawalaMessage) request).getType();
             int remotePositionFirstPuzzle = ((RicartAgrawalaMessage) request).getPositionFirstPuzzle();
             int remotePositionSecondPuzzle = ((RicartAgrawalaMessage) request).getPositionSecondPuzzle();
@@ -74,24 +67,30 @@ public class ServerRemoteRequestHandler {
             switch (type) {
                 case REQUEST:
                     System.out.println("Receive token REQUEST");
-                    boolean positionAlreadyLocked = ClientRemoteRequestHandler.positionAlreadyLock(remotePositionFirstPuzzle,remotePositionSecondPuzzle,positionFirstPuzzle,positionSecondPuzzle);
-                    serverManager.determineCriticalSectionEntry(this,ClientRemoteRequestHandler.getMyTimeStamp(),guestTimeStamp, positionAlreadyLocked);
+                    boolean positionAlreadyLocked = ClientRemoteRequestHandler.positionAlreadyLock(remotePositionFirstPuzzle, remotePositionSecondPuzzle, positionFirstPuzzle, positionSecondPuzzle);
+                    serverManager.determineCriticalSectionEntry(this,ClientRemoteRequestHandler.getMyTimeStamp(), guestTimeStamp, positionAlreadyLocked);
                     break;
                 case PERMIT:
                     System.out.println("Receive token PERMIT");
                     //add token to token list
                     recvdMsgTokens.add(Message.PERMIT);
-                    if(recvdMsgTokens.size() == serverManager.activeServerSize()) {
-                        if(recvdMsgTokens.contains(Message.PERMIT) && verifyToken(recvdMsgTokens)) {
-                            serverManager.criticalSection(serverManager.takeMessage());
-                        };
-                    } else {
-                        System.out.println("Another node is already executing the critical section");
-                        //Send update to GUI?
+                    System.out.println("Token size " + recvdMsgTokens.size() + "active server " + serverManager.activeServerSize() );
+                    if (recvdMsgTokens.size() == serverManager.activeServerSize()) {
+                        System.out.println("Check if is time to enter in critical section: Contain PERMIT " + recvdMsgTokens.contains(Message.PERMIT) + " only PERMIT? " + verifyToken(recvdMsgTokens));
+                        if (recvdMsgTokens.contains(Message.PERMIT) && verifyToken(recvdMsgTokens)) {
+                            recvdMsgTokens.clear();
+                            //System.out.println("Entering in critical section " + serverManager.takeClientMessage());
+                            serverManager.criticalSection(serverManager.takeClientMessage());
+                        } else {
+                            System.out.println("Another node is already executing the critical section " + recvdMsgTokens.toString());
+                            recvdMsgTokens.clear();
+                            //Send update to GUI?
+                        }
                     }
                     break;
                 case NOTPERMIT:
                     System.out.println("Receive token NOTPERMIT, Discard my operation");
+                    recvdMsgTokens.clear();
                     break;
                 default:
             }
@@ -137,7 +136,7 @@ public class ServerRemoteRequestHandler {
 
     public void sendAgrawalaMessage(RicartAgrawalaMessage message) {
         try {
-            System.out.println("Send Agrawala" + message.getType());
+            System.out.println("Send Agrawala " + message.getType());
             out.writeObject(message);
             out.flush();
         } catch (IOException e) {

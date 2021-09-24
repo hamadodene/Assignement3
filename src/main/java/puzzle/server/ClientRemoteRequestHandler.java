@@ -2,7 +2,6 @@ package puzzle.server;
 
 import puzzle.message.ConnectionRequest;
 import puzzle.message.Message;
-import puzzle.message.NodeInfo;
 import puzzle.message.TileMessage;
 
 import java.io.IOException;
@@ -67,14 +66,13 @@ public class ClientRemoteRequestHandler {
         if (request instanceof TileMessage) {
             TileMessage message = (TileMessage) request;
             if(serverManager.activeServerSize() > 0) {
-                serverManager.saveTileMessage(message);
+                serverManager.saveClientTileMessage(message);
                 ClientRemoteRequestHandler.setMyTimeStamp(TimeStamp.getInstance());
-                ClientRemoteRequestHandler.setRequestingCS(true);
                 //Send REQUEST to all server
                 serverManager.sendRequest(message.toString(), ClientRemoteRequestHandler.getMyTimeStamp(), Message.REQUEST);
             } else {
                 //Play alone
-                serverManager.saveTileMessage(message);
+                serverManager.saveClientTileMessage(message);
             }
         } else if (request instanceof ConnectionRequest) {
             String address = ((ConnectionRequest) request).getNodeInfo().getAddress();
