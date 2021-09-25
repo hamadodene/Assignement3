@@ -5,8 +5,7 @@ import puzzle.message.*;
 import java.io.*;
 import java.net.Socket;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 public class ServerRemoteRequestHandler {
     private Socket socket;
@@ -16,6 +15,11 @@ public class ServerRemoteRequestHandler {
     private ServerManager serverManager;
     private ObjectInputStream in;
     private ArrayList<Message> recvdMsgTokens;
+    int timeout = 60000;
+    long lastCheckIn;
+    boolean connected;
+    boolean readFail = false;
+
 
     public ServerRemoteRequestHandler(Socket socket, String name, ServerManager serverManager, ObjectOutputStream out, ObjectInputStream in) throws IOException {
         this.socket = socket;
@@ -24,16 +28,24 @@ public class ServerRemoteRequestHandler {
         this.name = name;
         this.serverManager = serverManager;
         recvdMsgTokens = new ArrayList<>();
+        connected = true;
+        lastCheckIn = System.currentTimeMillis();
         start();
+        ping();
     }
 
     private void start() {
         readFromNode = new Thread(() -> {
-            while (true) {
+            while (connected) {
                 try {
                     Object message = in.readObject();
+                    lastCheckIn = System.currentTimeMillis();
                     processNodeRequest(message);
                 } catch (IOException | ClassNotFoundException | InterruptedException e) {
+                    if (!readFail) {
+                        System.out.println("Server: [!] Failed to read from node " + this.getAddress() + " " + this.getPort());
+                        readFail = true;
+                    }
                     e.printStackTrace();
                     break;
                 }
@@ -67,13 +79,13 @@ public class ServerRemoteRequestHandler {
                 case REQUEST:
                     System.out.println("Receive token REQUEST");
                     boolean positionAlreadyLocked = ClientRemoteRequestHandler.positionAlreadyLock(remotePositionFirstPuzzle, remotePositionSecondPuzzle, positionFirstPuzzle, positionSecondPuzzle);
-                    serverManager.determineCriticalSectionEntry(this,ClientRemoteRequestHandler.getMyTimeStamp(), guestTimeStamp, positionAlreadyLocked);
+                    serverManager.determineCriticalSectionEntry(this, ClientRemoteRequestHandler.getMyTimeStamp(), guestTimeStamp, positionAlreadyLocked);
                     break;
                 case PERMIT:
                     System.out.println("Receive token PERMIT");
                     //add token to token list
                     recvdMsgTokens.add(Message.PERMIT);
-                    System.out.println("Token size " + recvdMsgTokens.size() + "active server " + serverManager.activeServerSize() );
+                    System.out.println("Token size " + recvdMsgTokens.size() + "active server " + serverManager.activeServerSize());
                     if (recvdMsgTokens.size() == serverManager.activeServerSize()) {
                         System.out.println("Check if is time to enter in critical section: Contain PERMIT " + recvdMsgTokens.contains(Message.PERMIT) + " only PERMIT? " + verifyToken(recvdMsgTokens));
                         if (recvdMsgTokens.contains(Message.PERMIT) && verifyToken(recvdMsgTokens)) {
@@ -95,7 +107,21 @@ public class ServerRemoteRequestHandler {
                     System.out.println("Request corrupted: Unknown message type");
                     break;
             }
+        } else if(request instanceof Ping) {
+            lastCheckIn = System.currentTimeMillis();
+            System.out.println("Receive ping message, the socket is healthy");
         }
+    }
+
+    public boolean update() {
+        long timeSinceCheckIn = System.currentTimeMillis() - lastCheckIn;
+        if (timeSinceCheckIn > timeout) {
+            System.out.println("Node at " + this.getAddress() + ":" + this.getPort() + " timed out (" + timeSinceCheckIn + "ms).");
+            connected = false;
+        } else {
+            connected = true;
+        }
+        return connected;
     }
 
     public String getAddress() {
@@ -129,6 +155,22 @@ public class ServerRemoteRequestHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void ping() {
+        Timer connectionMonitor = new Timer();
+        connectionMonitor.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Ping ping = new Ping();
+                try {
+                    out.writeObject(ping);
+                    out.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Date(), timeout/2);
     }
 
     public boolean verifyToken(ArrayList<Message> recvdMsgTokens) {

@@ -29,6 +29,7 @@ public class Server {
         this.backlog = backlog;
         this.port = port;
         serverManager = new ServerManager();
+        socketHealthChecker();
         messagesQueueHandling();
     }
 
@@ -111,20 +112,22 @@ public class Server {
         messageHandling.start();
     }
 
+    public void socketHealthChecker() {
+        Timer connectionMonitor = new Timer();
+        connectionMonitor.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                serverManager.checkConnections();
+            }
+        }, new Date(), 1000);
+    }
+
     public void join() throws InterruptedException {
         accept.join();
         messageHandling.join();
         crh.join();
         serverManager.join();
     }
-
-    public void checkConnections() {
-        ArrayList<ServerRemoteRequestHandler> serverList = serverManager.getServerList();
-        for (ServerRemoteRequestHandler srr : serverList) {
-            //To do
-        }
-        serverManager.setServerList(serverList);
-    } // checkConnection
 
     public boolean isServerStart() {
         return serverStart;

@@ -26,7 +26,7 @@ public class ServerManager {
     }
 
     public synchronized void criticalSection(TileMessage message) {
-        if(ClientRemoteRequestHandler.isRequestingCS()) {
+        if (ClientRemoteRequestHandler.isRequestingCS()) {
             System.out.println("----------------------------------------------- Time entered " + TimeStamp.getTime());
             Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
             System.out.println("List of server " + serverList.get(0).getAddress() + " " + serverList.get(0).getPort());
@@ -81,7 +81,7 @@ public class ServerManager {
                     System.out.println("Position locked, my timestamp is higher, send NOTPERMIT message");
                     //Send NOTPERMIT message to guest and continue executing critical section
                     srr.sendAgrawalaMessage(notPermitMessage);
-                } else if(myTimeStamp.compareTo(guestTimeStamp) == 0) {
+                } else if (myTimeStamp.compareTo(guestTimeStamp) == 0) {
                     //Complex situation
                     //To doubt, discard Guest and my REQUEST
                     System.out.println("Position locked, timestamp is equal, send NOTPERMIT message---------Discard GUEST and my REQUEST");
@@ -95,10 +95,27 @@ public class ServerManager {
             srr.sendAgrawalaMessage(permitMessage);
         }
     }
+
+    public void checkConnections() {
+        for (ServerRemoteRequestHandler server : serverList) {
+            server.update();
+        }
+        Iterator<ServerRemoteRequestHandler> iterator = serverList.iterator();
+        while (iterator.hasNext()) {
+            ServerRemoteRequestHandler server = iterator.next();
+            if (!server.connected) {
+                server.close();
+                iterator.remove();
+                System.out.println("Node at " + server.getAddress() + ":" + server.getPort() + " has disconnected");
+            }
+        }
+    }
+
     public void saveServerTileMessage(TileMessage message) throws InterruptedException {
         System.out.println("Server: added message on queue");
         messages.put(message);
     }
+
     public void saveClientTileMessage(TileMessage message) throws InterruptedException {
         System.out.println("Server: added message on queue");
         clientMessages.put(message);
