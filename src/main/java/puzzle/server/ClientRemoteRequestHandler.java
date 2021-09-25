@@ -73,7 +73,8 @@ public class ClientRemoteRequestHandler {
                 serverManager.sendRequest(message.toString(), ClientRemoteRequestHandler.getMyTimeStamp(), Message.REQUEST);
             } else {
                 //Play alone
-                serverManager.saveClientTileMessage(message);
+                serverManager.setLastClientMessage(message);
+                //serverManager.saveClientTileMessage(message);
             }
         } else if (request instanceof ConnectionRequest) {
             String address = ((ConnectionRequest) request).getNodeInfo().getAddress();

@@ -81,6 +81,7 @@ public class Server {
                     out.flush();
                 }
                 //Send client status
+                System.out.println("Send client status " + serverManager.getLastClientMessage());
                 out.writeObject(serverManager.getLastClientMessage());
                 out.flush();
                 serverManager.addServer(rh);
