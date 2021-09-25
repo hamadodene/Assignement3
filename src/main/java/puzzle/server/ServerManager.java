@@ -14,6 +14,7 @@ public class ServerManager {
     private LinkedBlockingQueue<TileMessage> messages;
     private LinkedBlockingQueue<TileMessage> clientMessages;
     private ArrayList<ServerRemoteRequestHandler> serverList;
+    private ClientRemoteRequestHandler client;
     private ArrayList<NodeInfo> activeServer;
     private int positionFirstPuzzle = 0;
     private int positionSecondPuzzle = 0;
@@ -109,6 +110,14 @@ public class ServerManager {
                 System.out.println("Node at " + server.getAddress() + ":" + server.getPort() + " has disconnected");
             }
         }
+    }
+
+    public ClientRemoteRequestHandler getClient() {
+        return client;
+    }
+
+    public void setClient(ClientRemoteRequestHandler client) {
+        this.client = client;
     }
 
     public void saveServerTileMessage(TileMessage message) throws InterruptedException {

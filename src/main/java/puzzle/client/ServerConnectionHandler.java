@@ -1,6 +1,8 @@
 package puzzle.client;
 
 import puzzle.message.ErrorMessage;
+import puzzle.message.Message;
+import puzzle.message.RicartAgrawalaMessage;
 import puzzle.message.TileMessage;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ public class ServerConnectionHandler {
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private MessagesQueue queue;
+    public boolean discardChange = false;
 
     public ServerConnectionHandler(Socket socket, MessagesQueue queue) throws IOException {
         this.socket = socket;
@@ -47,6 +50,20 @@ public class ServerConnectionHandler {
             TileMessage message = (TileMessage) request;
             System.out.println("Client node: received tile message " + message);
             queue.add(message);
+        } else if (request instanceof RicartAgrawalaMessage) {
+            Message type = ((RicartAgrawalaMessage) request).getType();
+            switch (type) {
+                case PERMIT:
+                    discardChange = false;
+                    break;
+                case NOTPERMIT:
+                    discardChange = true;
+                    break;
+                default:
+                    System.out.println("Unknown message type");
+                    discardChange = true;
+                    break;
+            }
         }
     }
 
@@ -61,6 +78,13 @@ public class ServerConnectionHandler {
         }
     }
 
+    public boolean isDiscardChange() {
+        return discardChange;
+    }
+
+    public void setDiscardChange(boolean discardChange) {
+        this.discardChange = discardChange;
+    }
 
     public void join() throws InterruptedException {
         readFromServer.join();

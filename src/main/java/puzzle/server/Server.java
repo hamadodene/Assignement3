@@ -86,6 +86,7 @@ public class Server {
             } else {
                 System.out.println("Server: Initialize connection with client");
                 crh = new ClientRemoteRequestHandler(socket, name, serverManager);
+                serverManager.setClient(crh);
             }
         } else {
             ErrorMessage error = new ErrorMessage("Need Connection request before start", -1);

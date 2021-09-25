@@ -69,6 +69,9 @@ public class ServerRemoteRequestHandler {
                 initializeConnectionWithNode(node, request);
             }
         } else if (request instanceof RicartAgrawalaMessage) {
+            RicartAgrawalaMessage permitMessage = new RicartAgrawalaMessage("", Message.PERMIT, -1, -1, null);
+            RicartAgrawalaMessage notPermitMessage = new RicartAgrawalaMessage("", Message.NOTPERMIT, -1, -1, null);
+            ClientRemoteRequestHandler client = serverManager.getClient();
             Message type = ((RicartAgrawalaMessage) request).getType();
             int remotePositionFirstPuzzle = ((RicartAgrawalaMessage) request).getPositionFirstPuzzle();
             int remotePositionSecondPuzzle = ((RicartAgrawalaMessage) request).getPositionSecondPuzzle();
@@ -92,19 +95,23 @@ public class ServerRemoteRequestHandler {
                             recvdMsgTokens.clear();
                             //System.out.println("Entering in critical section " + serverManager.takeClientMessage());
                             serverManager.criticalSection(serverManager.takeClientMessage());
+                            client.sendAgrawalaCheckResult(permitMessage);
+
                         } else {
                             System.out.println("Another node is already executing the critical section " + recvdMsgTokens.toString());
                             recvdMsgTokens.clear();
-                            //Send update to GUI?
+                            client.sendAgrawalaCheckResult(notPermitMessage);
                         }
                     }
                     break;
                 case NOTPERMIT:
                     System.out.println("Receive token NOTPERMIT, Discard my operation");
                     recvdMsgTokens.clear();
+                    client.sendAgrawalaCheckResult(notPermitMessage);
                     break;
                 default:
                     System.out.println("Request corrupted: Unknown message type");
+                    client.sendAgrawalaCheckResult(notPermitMessage);
                     break;
             }
         } else if(request instanceof Ping) {

@@ -2,6 +2,7 @@ package puzzle.server;
 
 import puzzle.message.ConnectionRequest;
 import puzzle.message.Message;
+import puzzle.message.RicartAgrawalaMessage;
 import puzzle.message.TileMessage;
 
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class ClientRemoteRequestHandler {
     private synchronized void processNodeRequest(Object request) throws InterruptedException {
         if (request instanceof TileMessage) {
             TileMessage message = (TileMessage) request;
-            if(serverManager.activeServerSize() > 0) {
+            if (serverManager.activeServerSize() > 0) {
                 serverManager.saveClientTileMessage(message);
                 ClientRemoteRequestHandler.setMyTimeStamp(TimeStamp.getInstance());
                 //Send REQUEST to all server
@@ -80,10 +81,20 @@ public class ClientRemoteRequestHandler {
             String name = ((ConnectionRequest) request).getNodeInfo().getName();
             System.out.println("Server: received connection request for " + address + " " + port);
             try {
-                initializeConnectionWithNode(address,port, request);
+                initializeConnectionWithNode(address, port, request);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void sendAgrawalaCheckResult(RicartAgrawalaMessage message) {
+        try {
+            System.out.println("Client Send Agrawala check result: " + message.getType());
+            out.writeObject(message);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

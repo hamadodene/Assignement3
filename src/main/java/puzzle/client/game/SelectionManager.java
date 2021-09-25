@@ -7,7 +7,6 @@ public class SelectionManager {
     private int secondTilePosition;
 
     public void selectTile(final Tile tile, final Listener listener) {
-
         if (selectionActive) {
             selectionActive = false;
             secondTilePosition = tile.getCurrentPosition();

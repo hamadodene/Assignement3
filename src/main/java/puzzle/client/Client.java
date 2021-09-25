@@ -16,7 +16,7 @@ public class Client {
     //Need this to write to server
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private ServerConnectionHandler serverConnectionHandler;
+    ServerConnectionHandler serverConnectionHandler;
     private MessagesQueue queue;
     private boolean clientIsConnected = false;
 
@@ -70,6 +70,10 @@ public class Client {
 
     public void sendTileToServer(TileMessage message) {
         serverConnectionHandler.sendTile(message);
+    }
+
+    public ServerConnectionHandler getServerConnectionHandler() {
+        return serverConnectionHandler;
     }
 
     public void join() throws InterruptedException {

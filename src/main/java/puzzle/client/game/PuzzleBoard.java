@@ -2,6 +2,7 @@ package puzzle.client.game;
 
 import puzzle.client.Client;
 import puzzle.client.MessagesQueue;
+import puzzle.client.ServerConnectionHandler;
 import puzzle.client.utility.UtilityFunctions;
 import puzzle.message.TileMessage;
 
@@ -32,6 +33,8 @@ public class PuzzleBoard extends JFrame {
     private MessagesQueue queue;
     private final JPanel board;
 	private SelectionManager selectionManager = new SelectionManager();
+	ServerConnectionHandler server;
+	private boolean waitingAgrawalaCheck = false;
 	
     public PuzzleBoard(final int rows, final int columns, final String imagePath, Client client, MessagesQueue queue, List<Integer> randomPositions) {
     	this.rows = rows;
@@ -39,7 +42,7 @@ public class PuzzleBoard extends JFrame {
 		this.client = client;
 		this.randomPositions = randomPositions;
 		this.queue = queue;
-    	
+    	this.server = client.getServerConnectionHandler();
     	setTitle("Puzzle");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -96,13 +99,19 @@ public class PuzzleBoard extends JFrame {
             btn.addActionListener(actionListener -> {
             	selectionManager.selectTile(tile, () -> {
             		paintPuzzle(board);
-                    System.out.println("Position first " + tile.getCurrentPosition() + " Postion second " + selectionManager.getSecondTilePosition() );
+                    System.out.println("Position first " + tile.getCurrentPosition() + " Position second " + selectionManager.getSecondTilePosition() );
             		//Send message to server for broadcast to all node
                     TileMessage message = new TileMessage(this.getPositions(), tile.getCurrentPosition(), selectionManager.getSecondTilePosition() );
             		client.sendTileToServer(message);
-
-                	checkSolution();
-
+            		waitingAgrawalaCheck = true;
+                    if (!server.discardChange) {
+                        waitingAgrawalaCheck = false;
+                        checkSolution();
+                    } else {
+                        //Rollback
+                        refreshPuzzle();
+                        waitingAgrawalaCheck = false;
+                    }
             	});
             });
     	});
@@ -153,7 +162,7 @@ public class PuzzleBoard extends JFrame {
                 try {
                     TileMessage message = queue.take();
                     List<Integer> remoteRandomPosition = message.getTiles();
-                    if(!this.randomPositions.equals(remoteRandomPosition)) {
+                    if(!this.randomPositions.equals(remoteRandomPosition) && !waitingAgrawalaCheck) {
                         this.randomPositions = remoteRandomPosition;
                         this.refreshPuzzle();
                         this.paintPuzzle(this.board);
