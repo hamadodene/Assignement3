@@ -30,6 +30,14 @@ lui è nella sezione critica. Sviluppiamo dalla parte di X. Dato che anche X sta
   - Se hanno cliccato punti del puzzle diversi, allora X manda un messaggio di tipo Message.PERMIT
   - Se hanno cliccato almeno un puzzle uguale, allora X confronta il suo timestamp con quello di Y. Se Y ha priorità 
   maggiore allora X risponde con un Message.PERMIT. Se invece X ha priorità maggiore manda un Message.NOTPERMIT a Y.
-  - Se hanno cliccato almeno un puzzle uguale e hanno timestamp uguali, allora nel dubbio X manda un PERMIT a Y.
+  - Se hanno cliccato almeno un puzzle uguale e hanno timestamp uguali, allora nel dubbio X manda un NOTPERMIT a Y. In sostanza nel dubbio scartiamo
+  tutte e due le mosse.
   
 - Se X invece non avesse fatto nessun mossa, risponderebbe con un Message.PERMIT  
+
+##Mosse in differed
+L'algoritmo di Agrawala prevede che se c'è un REQUEST che avrebbe come risposta un NOTPERMIT, di gestirla poi in differita.
+Ovvero nel nostro caso, quando viene eseguito una mossa, in caso di NONPERMIT bisognerebbe salvarsi la REQUEST e in differita
+rispondere alla REQUEST.
+In questo gioco di puzzle però non avrebbe molto senso, in quanto un puzzle cliccato nel tempo cambierebbe posizione.
+Di conseguenza una mossa dopo X mosse potrebbe non avere senso in quanto il puzzle cliccato magari ha già cambiato posizione.

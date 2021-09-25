@@ -62,7 +62,7 @@ public class ClientRemoteRequestHandler {
         ClientRemoteRequestHandler.requestingCS = requestingCS;
     }
 
-    private void processNodeRequest(Object request) throws InterruptedException {
+    private synchronized void processNodeRequest(Object request) throws InterruptedException {
         if (request instanceof TileMessage) {
             TileMessage message = (TileMessage) request;
             if(serverManager.activeServerSize() > 0) {

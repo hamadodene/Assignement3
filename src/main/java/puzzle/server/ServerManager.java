@@ -8,7 +8,6 @@ import puzzle.message.TileMessage;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ServerManager {
@@ -27,18 +26,21 @@ public class ServerManager {
     }
 
     public synchronized void criticalSection(TileMessage message) {
-        System.out.println("----------------------------------------------- Time entered " + TimeStamp.getTime());
-        ClientRemoteRequestHandler.setRequestingCS(true);
-        Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
-        System.out.println("List of server " + serverList.get(0).getAddress() + " " + serverList.get(0).getPort());
-        while (it.hasNext()) {
-            ServerRemoteRequestHandler srh = it.next();
-            // writeUnshared() is like writeObject(), but always writes
-            System.out.println("Server: Broadcast tile message to " + srh.getAddress() + ":" + srh.getPort());
-            // a new copy of the object
-            srh.sendTile(message);
+        if(ClientRemoteRequestHandler.isRequestingCS()) {
+            System.out.println("----------------------------------------------- Time entered " + TimeStamp.getTime());
+            Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
+            System.out.println("List of server " + serverList.get(0).getAddress() + " " + serverList.get(0).getPort());
+            while (it.hasNext()) {
+                ServerRemoteRequestHandler srh = it.next();
+                // writeUnshared() is like writeObject(), but always writes
+                System.out.println("Server: Broadcast tile message to " + srh.getAddress() + ":" + srh.getPort());
+                // a new copy of the object
+                srh.sendTile(message);
+            }
+            exitCriticalSection();
+        } else {
+            System.out.println("-----------EXIT FROM CRITICAL SECTION---NO ACTION EXECUTED--");
         }
-        exitCriticalSection();
     }
 
     private void exitCriticalSection() {
@@ -48,12 +50,13 @@ public class ServerManager {
     }
 
     public void sendRequest(String request, Timestamp timeStamp, Message type) {
+        //Set critical section request to TRUE
+        ClientRemoteRequestHandler.setRequestingCS(true);
         Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
         while (it.hasNext()) {
             ServerRemoteRequestHandler srh = it.next();
             System.out.println("Prepare Agrawala request for " + srh.getAddress() + " " + srh.getPort());
             RicartAgrawalaMessage message = new RicartAgrawalaMessage(request, type, positionFirstPuzzle, positionSecondPuzzle, timeStamp);
-            // a new copy of the object
             srh.sendAgrawalaMessage(message);
         }
     }
@@ -70,15 +73,21 @@ public class ServerManager {
                 //Check timestamp
                 if (myTimeStamp.compareTo(guestTimeStamp) > 0) { //Guest timestamp has higher priority
                     System.out.println("Position locked, Guest timestamp is higher, send PERMIT message");
+                    //Not execute critical section
+                    exitCriticalSection();
+                    //Send PERMIT message to Guest
                     srr.sendAgrawalaMessage(permitMessage);
                 } else if (myTimeStamp.compareTo(guestTimeStamp) < 0) { //my timestamp has higher priority
                     System.out.println("Position locked, my timestamp is higher, send NOTPERMIT message");
+                    //Send NOTPERMIT message to guest and continue executing critical section
                     srr.sendAgrawalaMessage(notPermitMessage);
-                } else {
+                } else if(myTimeStamp.compareTo(guestTimeStamp) == 0) {
                     //Complex situation
-                    //To doubt i send permit
-                    System.out.println("Position locked, timestamp is equal, send PERMIT message");
-                    srr.sendAgrawalaMessage(permitMessage);
+                    //To doubt, discard Guest and my REQUEST
+                    System.out.println("Position locked, timestamp is equal, send NOTPERMIT message---------Discard GUEST and my REQUEST");
+                    //Not execute critical section
+                    exitCriticalSection();
+                    srr.sendAgrawalaMessage(notPermitMessage);
                 }
             }
         } else {

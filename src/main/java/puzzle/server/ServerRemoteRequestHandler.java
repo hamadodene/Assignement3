@@ -43,12 +43,11 @@ public class ServerRemoteRequestHandler {
         readFromNode.start();
     }
 
-    private void processNodeRequest(Object request) throws IOException, InterruptedException {
+    private synchronized void processNodeRequest(Object request) throws IOException, InterruptedException {
         if (request instanceof TileMessage) {
             TileMessage message = (TileMessage) request;
-            System.out.println("Server: received tile message from another node: " + message.toString());
+            System.out.println("Server: received tile message from another node: " + message);
             serverManager.saveServerTileMessage(message);
-            //clientMessage.add(message);
         } else if (request instanceof NodeInfoList) {
             System.out.println("Server: Received node list " + serverManager.getActiveServer().toString());
             ArrayList<NodeInfo> nodeList = ((NodeInfoList) request).getActiveNode();
@@ -93,6 +92,8 @@ public class ServerRemoteRequestHandler {
                     recvdMsgTokens.clear();
                     break;
                 default:
+                    System.out.println("Request corrupted: Unknown message type");
+                    break;
             }
         }
     }

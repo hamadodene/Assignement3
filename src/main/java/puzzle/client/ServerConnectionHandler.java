@@ -40,7 +40,7 @@ public class ServerConnectionHandler {
         readFromServer.start();
     }
 
-    private void processNodeRequest(Object request) throws IOException, ClassNotFoundException, InterruptedException {
+    private synchronized void processNodeRequest(Object request) throws IOException, ClassNotFoundException, InterruptedException {
         if (request instanceof ErrorMessage) {
             System.out.println("Client: encored error during connection " + ((ErrorMessage) in.readObject()).getError());
         } else if (request instanceof TileMessage) {
