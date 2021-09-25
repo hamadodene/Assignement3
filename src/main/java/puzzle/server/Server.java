@@ -72,7 +72,7 @@ public class Server {
             boolean alreadyHaveNodeList = ((ConnectionRequest) request).getAlreadyHaveNodeList();
             if (isServer ) {
                 ServerRemoteRequestHandler rh = new ServerRemoteRequestHandler(socket, name, serverManager, out, in);
-                if(serverManager.activeServerSize() > 1 && !alreadyHaveNodeList) {
+                if(serverManager.activeServerSize() >= 1 && !alreadyHaveNodeList) {
                     ArrayList<NodeInfo> nodeInfo = serverManager.getActiveServer();
                     NodeInfo nn = new NodeInfo(address.getHostAddress(),port,name,true);
                     nodeInfo.add(nn);
