@@ -79,6 +79,9 @@ public class Server {
                     NodeInfoList listNodes = new NodeInfoList(nodeInfo);
                     out.writeObject(listNodes);
                     out.flush();
+                    //Send client status
+                    out.writeObject(serverManager.getLastClientMessage());
+                    out.flush();
                 }
                 serverManager.addServer(rh);
                 serverManager.addServerInfo(((ConnectionRequest) request).getNodeInfo());

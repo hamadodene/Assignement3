@@ -90,7 +90,7 @@ public class ClientRemoteRequestHandler {
 
     public void sendAgrawalaCheckResult(RicartAgrawalaMessage message) {
         try {
-            System.out.println("Client Send Agrawala check result: " + message.getType());
+            System.out.println("Send Agrawala check result to client: " + message.getType());
             out.writeObject(message);
             out.flush();
         } catch (IOException e) {

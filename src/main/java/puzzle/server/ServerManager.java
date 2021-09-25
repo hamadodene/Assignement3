@@ -18,6 +18,7 @@ public class ServerManager {
     private ArrayList<NodeInfo> activeServer;
     private int positionFirstPuzzle = 0;
     private int positionSecondPuzzle = 0;
+    private TileMessage lastClientMessage;
 
     public ServerManager() {
         this.messages = new LinkedBlockingQueue<>();
@@ -172,6 +173,14 @@ public class ServerManager {
 
     public int getPositionSecondPuzzle() {
         return positionSecondPuzzle;
+    }
+
+    public TileMessage getLastClientMessage() {
+        return lastClientMessage;
+    }
+
+    public void setLastClientMessage(TileMessage lastClientMessage) {
+        this.lastClientMessage = lastClientMessage;
     }
 
     public void join() throws InterruptedException {

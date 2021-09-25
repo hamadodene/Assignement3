@@ -120,7 +120,7 @@ public class PuzzleBoard extends JFrame {
         //setLocationRelativeTo(null);
     }
 
-    private List<Integer> getPositions(){
+    public List<Integer> getPositions(){
         return this.tiles.stream().map(Tile::getOriginalPosition).collect(Collectors.toList());
     }
 

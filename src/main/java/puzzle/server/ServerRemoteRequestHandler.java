@@ -94,7 +94,9 @@ public class ServerRemoteRequestHandler {
                         if (recvdMsgTokens.contains(Message.PERMIT) && verifyToken(recvdMsgTokens)) {
                             recvdMsgTokens.clear();
                             //System.out.println("Entering in critical section " + serverManager.takeClientMessage());
-                            serverManager.criticalSection(serverManager.takeClientMessage());
+                            TileMessage message = serverManager.takeClientMessage();
+                            serverManager.setLastClientMessage(message);
+                            serverManager.criticalSection(message);
                             client.sendAgrawalaCheckResult(permitMessage);
 
                         } else {
@@ -114,7 +116,7 @@ public class ServerRemoteRequestHandler {
                     client.sendAgrawalaCheckResult(notPermitMessage);
                     break;
             }
-        } else if(request instanceof Ping) {
+        } else if (request instanceof Ping) {
             lastCheckIn = System.currentTimeMillis();
             System.out.println("Receive ping message, the socket is healthy");
         }
@@ -177,7 +179,7 @@ public class ServerRemoteRequestHandler {
                     e.printStackTrace();
                 }
             }
-        }, new Date(), timeout/2);
+        }, new Date(), timeout / 2);
     }
 
     public boolean verifyToken(ArrayList<Message> recvdMsgTokens) {
