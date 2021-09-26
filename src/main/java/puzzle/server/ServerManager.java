@@ -121,12 +121,12 @@ public class ServerManager {
         this.client = client;
     }
 
-    public void saveServerTileMessage(TileMessage message) throws InterruptedException {
+    public synchronized void saveServerTileMessage(TileMessage message) throws InterruptedException {
         System.out.println("Server: added message on queue");
         messages.put(message);
     }
 
-    public void saveClientTileMessage(TileMessage message) throws InterruptedException {
+    public synchronized void saveClientTileMessage(TileMessage message) throws InterruptedException {
         System.out.println("Server: added message on queue");
         clientMessages.put(message);
     }
@@ -175,11 +175,11 @@ public class ServerManager {
         return positionSecondPuzzle;
     }
 
-    public TileMessage getLastClientMessage() {
+    public synchronized TileMessage getLastClientMessage() {
         return lastClientMessage;
     }
 
-    public void setLastClientMessage(TileMessage lastClientMessage) {
+    public synchronized void setLastClientMessage(TileMessage lastClientMessage) {
         this.lastClientMessage = lastClientMessage;
     }
 

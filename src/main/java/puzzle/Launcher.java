@@ -13,7 +13,7 @@ public class Launcher {
         final int backlog = 50;
         final int n = 3;
         final int m = 5;
-        final String imagePath = "src/main/java/game/bletchley-park-mansion.jpg";
+        final String imagePath = "src/main/java/puzzle/client/game/bletchley-park-mansion.jpg";
         Node node = new Node(nodeName, serverAddress, serverPort, backlog, n, m, imagePath);
     }
 }

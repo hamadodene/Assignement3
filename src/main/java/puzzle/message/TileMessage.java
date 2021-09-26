@@ -1,7 +1,5 @@
 package puzzle.message;
 
-import puzzle.server.TimeStamp;
-
 import java.io.Serializable;
 import java.util.List;
 
