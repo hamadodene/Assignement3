@@ -51,7 +51,7 @@ public class ServerManager {
         System.out.println("----------------------------------------------- Time exited  " + TimeStamp.getTime());
     }
 
-    public void sendRequest(String request, Timestamp timeStamp, Message type) {
+    public synchronized void sendRequest(String request, Timestamp timeStamp, Message type) {
         //Set critical section request to TRUE
         ClientRemoteRequestHandler.setRequestingCS(true);
         Iterator<ServerRemoteRequestHandler> it = serverList.iterator();
@@ -117,7 +117,7 @@ public class ServerManager {
         return client;
     }
 
-    public void setClient(ClientRemoteRequestHandler client) {
+    public synchronized void setClient(ClientRemoteRequestHandler client) {
         this.client = client;
     }
 
@@ -131,48 +131,36 @@ public class ServerManager {
         clientMessages.put(message);
     }
 
-    public void addServer(ServerRemoteRequestHandler srh) {
+    public synchronized void addServer(ServerRemoteRequestHandler srh) {
         serverList.add(srh);
     }
 
-    public void addServerInfo(NodeInfo nodeInfo) {
+    public synchronized void addServerInfo(NodeInfo nodeInfo) {
         activeServer.add(nodeInfo);
     }
 
-    public int activeServerSize() {
-        return activeServer.size();
-    }
-
-    public ArrayList<NodeInfo> getActiveServer() {
-        return activeServer;
-    }
-
-    public ArrayList<ServerRemoteRequestHandler> getServerList() {
-        return serverList;
-    }
-
-    public void setServerList(ArrayList<ServerRemoteRequestHandler> srr) {
-        serverList = srr;
-    }
-
-    public void setActiveServer(ArrayList<NodeInfo> activeServer) {
-        this.activeServer = activeServer;
-    }
-
-    public TileMessage takeServerMessage() throws InterruptedException {
+    public synchronized TileMessage takeServerMessage() throws InterruptedException {
         return messages.take();
     }
 
-    public TileMessage takeClientMessage() throws InterruptedException {
+    public synchronized TileMessage takeClientMessage() throws InterruptedException {
         return clientMessages.take();
     }
 
-    public int getPositionFirstPuzzle() {
-        return positionFirstPuzzle;
+    public synchronized void setServerList(ArrayList<ServerRemoteRequestHandler> srr) {
+        serverList = srr;
     }
 
-    public int getPositionSecondPuzzle() {
-        return positionSecondPuzzle;
+    public synchronized ArrayList<NodeInfo> getActiveServer() {
+        return activeServer;
+    }
+
+    public synchronized ArrayList<ServerRemoteRequestHandler> getServerList() {
+        return serverList;
+    }
+
+    public synchronized void setActiveServer(ArrayList<NodeInfo> activeServer) {
+        this.activeServer = activeServer;
     }
 
     public synchronized TileMessage getLastClientMessage() {
@@ -181,6 +169,18 @@ public class ServerManager {
 
     public synchronized void setLastClientMessage(TileMessage lastClientMessage) {
         this.lastClientMessage = lastClientMessage;
+    }
+
+    public int activeServerSize() {
+        return activeServer.size();
+    }
+
+    public int getPositionFirstPuzzle() {
+        return positionFirstPuzzle;
+    }
+
+    public int getPositionSecondPuzzle() {
+        return positionSecondPuzzle;
     }
 
     public void join() throws InterruptedException {

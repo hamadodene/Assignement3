@@ -11,7 +11,7 @@ public class MessagesQueue {
         messages = new LinkedBlockingQueue<>();
     }
 
-    public void add(TileMessage message) throws InterruptedException {
+    public synchronized void add(TileMessage message) throws InterruptedException {
         messages.put(message);
     }
 

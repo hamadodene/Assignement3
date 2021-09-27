@@ -56,7 +56,7 @@ public class Server {
         accept.start();
     }
 
-    private void processRequest(Socket socket) throws IOException, InterruptedException {
+    private synchronized void processRequest(Socket socket) throws IOException, InterruptedException {
         System.out.println("Server: Processing connection request");
         in = new ObjectInputStream(socket.getInputStream());
         Object request = null;
